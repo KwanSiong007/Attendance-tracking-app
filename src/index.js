@@ -8,7 +8,7 @@ import Register from "./pages/Register";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    {/* <LogIn /> */}
-    <Register />
+    <LogIn />
+    {/* <Register /> */}
   </React.StrictMode>
 );

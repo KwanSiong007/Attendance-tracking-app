@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 
-function Register() {
+function LogIn() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -26,15 +26,6 @@ function Register() {
             margin="normal"
             required
             fullWidth
-            name="name"
-            label="Full Name"
-            autoComplete="name"
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
             name="email"
             label="Email Address"
             autoComplete="email"
@@ -47,7 +38,7 @@ function Register() {
             name="password"
             label="Password"
             type="password"
-            autoComplete="new-password"
+            autoComplete="current-password"
           />
           <Button
             type="submit"
@@ -56,7 +47,7 @@ function Register() {
             color="primary"
             sx={{ mt: 3 }}
           >
-            Register
+            Log In
           </Button>
         </Box>
       </Box>
@@ -64,4 +55,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default LogIn;

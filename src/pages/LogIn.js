@@ -50,6 +50,10 @@ function LogIn() {
             Log In
           </Button>
         </Box>
+        <br />
+        <div>
+          Don't have an account ? <a href="/register">Register</a>
+        </div>
       </Box>
     </Container>
   );

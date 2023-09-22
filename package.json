@@ -7,8 +7,10 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.10",
+    "firebase": "^10.4.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {

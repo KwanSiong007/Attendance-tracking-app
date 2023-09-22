@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
-import { push, ref as databaseRef, set } from "firebase/database";
+import { push, ref, set } from "firebase/database";
 import { database } from "../firebase"; // Import Firebase database instance
 
 const DB_PROFILE_KEY = "profile-data";
@@ -37,11 +37,10 @@ function Register() {
         email: state.email,
       };
       console.log("profileData:", profileData);
-      const profileRef = databaseRef(database, DB_PROFILE_KEY);
+      const profileRef = ref(database, DB_PROFILE_KEY);
 
       // Create a new profile entry in the database
       const newProfileRef = push(profileRef);
-      console.log("newProfileRef:", newProfileRef);
       // Set the profile data
       set(newProfileRef, profileData);
 
@@ -74,12 +73,6 @@ function Register() {
       setPasswordError(false);
     }
   };
-
-  /*const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Additional registration logic here
-  };*/
 
   //The error prop in the password TextField is set to passwordError, which will make the field turn red and display the error message when passwordError is true.
   return (

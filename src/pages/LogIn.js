@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { signIn, reAuth, logOut } from "../api/authentication";
 import WorkerScreen from "./WorkerScreen";
+import ManagerScreen from "./ManagerScreen";
 import { push, ref, set } from "firebase/database";
 import { database } from "../firebase";
 
@@ -99,21 +100,27 @@ function LogIn() {
     const loggedInUserData = {
       username: user.displayName,
       email: user.email,
+      userID: user.uid,
     };
     const loggedInRef = ref(database, DB_LOGGED_IN_USER_KEY);
-
-    //push(messageListRef);: The push function generates a new reference with a unique key within the location specified by messageListRef.
-    //This is typically used to add new data (messages) with an auto-generated key, ensuring each message has a unique identifier
     const newLoggedInRef = push(loggedInRef);
-
-    //The `set` function sets the value of the new reference (in this case, newMessageRef) to a specific value.
     set(newLoggedInRef, loggedInUserData);
     console.log("loggedInUserData", loggedInUserData);
+
+    const checkManagerRole = () => {
+      if (user.uid === "0HLQ3NGKpCZt0LNlT0vET0so7Ip1") {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    const isManager = checkManagerRole();
 
     return (
       <div>
         <h1>Welcome back ! {user.displayName}</h1>
-        <WorkerScreen />
+        {isManager ? <ManagerScreen /> : <WorkerScreen />}
         <div>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>

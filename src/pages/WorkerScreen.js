@@ -7,6 +7,8 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { point } from "@turf/helpers";
+import { default as findDistance } from "@turf/distance";
 import { onChildAdded, ref } from "firebase/database";
 import { database } from "../firebase";
 
@@ -30,17 +32,17 @@ function WorkerScreen() {
       {
         name: "Tanjong Pagar MRT",
         coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
-        radius: 0.005,
+        radius: 1,
       },
       // ...other sites
     ];
 
     const checkSite = (lat, lng) => {
+      const userPoint = point([lat, lng]);
       for (let site of sites) {
-        const distance = Math.hypot(
-          site.coordinates.lat - lat,
-          site.coordinates.lng - lng
-        );
+        const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
+        const distance = findDistance(userPoint, sitePoint);
+        console.log(`Distance of ${distance} km from ${site.name}`);
         if (distance < site.radius) {
           setSiteName(site.name);
           setGpsStatus("on-site");

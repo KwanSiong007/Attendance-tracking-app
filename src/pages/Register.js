@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   Button,
@@ -139,7 +140,7 @@ function Register() {
         </Box>
         <br />
         <div>
-          Go back to Sign in page: <a href="/">Sign in</a>
+          Go back to <Link to="/">Log In</Link>
         </div>
       </Box>
     </Container>

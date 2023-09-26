@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   Button,
@@ -119,7 +120,7 @@ function LogIn() {
 
     return (
       <div>
-        <h1>Welcome back ! {user.displayName}</h1>
+        <h1>Welcome back, {user.displayName}!</h1>
         {isManager ? <ManagerScreen /> : <WorkerScreen />}
         <div>
           <button onClick={handleSignOut}>Sign Out</button>
@@ -177,7 +178,7 @@ function LogIn() {
         </Box>
         <br />
         <div>
-          Don't have an account ? <a href="/register">Register</a>
+          Don't have an account? <Link to="/register">Register</Link>
         </div>
       </Box>
     </Container>

@@ -14,6 +14,8 @@ const DB_LOGGED_IN_USER_KEY = "logged_in_user";
 
 function WorkerScreen() {
   const [loggedInUser, setLoggedInUser] = useState([]);
+  const [gpsStatus, setGpsStatus] = useState("off");
+  const [siteName, setSiteName] = useState(null);
 
   useEffect(() => {
     const loggedInUserRef = ref(database, DB_LOGGED_IN_USER_KEY);
@@ -23,13 +25,53 @@ function WorkerScreen() {
         { key: data.key, val: data.val() },
       ]);
     });
+
+    const sites = [
+      {
+        name: "Tanjong Pagar MRT",
+        coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
+        radius: 0.005,
+      },
+      // ...other sites
+    ];
+
+    const checkSite = (lat, lng) => {
+      for (let site of sites) {
+        const distance = Math.hypot(
+          site.coordinates.lat - lat,
+          site.coordinates.lng - lng
+        );
+        if (distance < site.radius) {
+          setSiteName(site.name);
+          setGpsStatus("on-site");
+          return;
+        }
+      }
+      setSiteName(null);
+      setGpsStatus("on-other");
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          console.log(
+            `Position detected at lat: ${latitude}, lng: ${longitude}`
+          );
+          checkSite(latitude, longitude);
+        },
+        (error) => {
+          console.error(error);
+          setGpsStatus("off");
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
   }, []);
 
   console.log("loggedInUser:", loggedInUser);
-
-  // Assuming the GPS status and location data will be fetched and stored in state
-  const gpsStatus = "off"; // This could be 'off', 'on-site', or 'on-other'
-  const siteName = "Site A"; // Name of the site if GPS is 'on-site'
 
   const checkIns = [
     { location: "Site A", checkInTime: "08:00 AM", checkOutTime: "05:00 PM" },

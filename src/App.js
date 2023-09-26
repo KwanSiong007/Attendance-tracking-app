@@ -19,7 +19,7 @@ const routes = [
 function App() {
   return (
     <div className="App">
-      <Router basename="/Attendance-tracking-app">
+      <Router>
         <Routes>
           {routes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />

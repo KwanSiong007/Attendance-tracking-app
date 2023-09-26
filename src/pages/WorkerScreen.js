@@ -34,6 +34,11 @@ function WorkerScreen() {
         coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
         radius: 1,
       },
+      {
+        name: "11 Woodlands Cl",
+        coordinates: { lat: 1.4344380920124078, lng: 103.80244549985441 },
+        radius: 1,
+      },
       // ...other sites
     ];
 

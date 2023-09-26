@@ -35,8 +35,8 @@ function WorkerScreen() {
         radius: 1,
       },
       {
-        name: "11 Woodlands Cl",
-        coordinates: { lat: 1.4344380920124078, lng: 103.80244549985441 },
+        name: "Woodlands MRT",
+        coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
         radius: 1,
       },
       // ...other sites

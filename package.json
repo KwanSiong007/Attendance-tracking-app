@@ -1,5 +1,6 @@
 {
   "name": "project2-bootcamp",
+  "homepage": "https://KwanSiong007.github.io/Attendance-tracking-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -8,12 +9,15 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.10",
     "firebase": "^10.4.0",
+    "gh-pages": "^6.0.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build"
   },

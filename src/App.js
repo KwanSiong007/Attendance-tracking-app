@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import LogIn from "./pages/LogIn";
-import ManagerScreen from "./pages/ManagerScreen";
-import WorkerScreen from "./pages/WorkerScreen";
 import Register from "./pages/Register";
 
 const routes = [
@@ -15,14 +13,6 @@ const routes = [
   {
     path: "/register",
     element: <Register />,
-  },
-  {
-    path: "/manager-screen",
-    element: <ManagerScreen />,
-  },
-  {
-    path: "/worker-screen",
-    element: <WorkerScreen />,
   },
 ];
 

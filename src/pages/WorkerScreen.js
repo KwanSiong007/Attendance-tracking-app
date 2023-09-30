@@ -7,6 +7,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
@@ -28,7 +29,11 @@ function WorkerScreen() {
         { key: data.key, val: data.val() },
       ]);
     });
+  }, []);
 
+  console.log("loggedInUser:", loggedInUser);
+
+  const handleGetLocation = () => {
     const sites = [
       {
         name: "Tanjong Pagar MRT",
@@ -55,8 +60,8 @@ function WorkerScreen() {
           return;
         }
       }
+      setGpsStatus("on-elsewhere");
       setSiteName(null);
-      setGpsStatus("on-other");
     };
 
     if (navigator.geolocation) {
@@ -70,33 +75,34 @@ function WorkerScreen() {
         },
         (error) => {
           console.error(error);
-          setGpsStatus("off");
+          if (error.code === 1) {
+            setGpsStatus("error-denied");
+          } else {
+            setGpsStatus("error");
+          }
         },
         { enableHighAccuracy: true }
       );
     } else {
-      console.error("Geolocation is not supported by this browser.");
+      setGpsStatus("error-not-supported");
     }
-  }, []);
-
-  console.log("loggedInUser:", loggedInUser);
+  };
 
   const checkIns = [
     { location: "Site A", checkInTime: "08:00 AM", checkOutTime: "05:00 PM" },
     // ...other check-ins
   ];
 
-  let statusText;
-  switch (gpsStatus) {
-    case "on-site":
-      statusText = `GPS is on. You are at ${siteName}.`;
-      break;
-    case "on-other":
-      statusText = "GPS is on. You are not at any site.";
-      break;
-    default:
-      statusText = "GPS is off.";
-  }
+  const statusMessages = {
+    "on-site": `You're at ${siteName}. Ready to check in/out.`,
+    "on-elsewhere":
+      "You're not at any work site. If you're at a work site, please contact support.",
+    "error-denied":
+      "Please allow access to GPS so we can tell whether you're at a work site.",
+    error: "GPS error. Please contact support.",
+    "error-not-supported":
+      "GPS not supported. Please use a compatible browser.",
+  };
 
   return (
     <Box
@@ -105,10 +111,21 @@ function WorkerScreen() {
         flexDirection: "column",
         alignItems: "center",
         gap: 2,
+        mb: 2,
       }}
     >
-      <div>{statusText}</div>
-      <Button variant="outlined">Get Location</Button>
+      {gpsStatus !== "off" && (
+        <Typography>{statusMessages[gpsStatus]}</Typography>
+      )}
+      {!["on-site", "on-elsewhere"].includes(gpsStatus) && (
+        <Button
+          onClick={handleGetLocation}
+          variant="outlined"
+          sx={{ textTransform: "none" }}
+        >
+          Get Location
+        </Button>
+      )}
       <Button
         variant="contained"
         sx={{

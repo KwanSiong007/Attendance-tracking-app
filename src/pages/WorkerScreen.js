@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Box,
   Button,
   Table,
   TableBody,
@@ -98,8 +99,16 @@ function WorkerScreen() {
   }
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
       <div>{statusText}</div>
+      <Button variant="outlined">Get Location</Button>
       <Button
         variant="contained"
         sx={{
@@ -129,7 +138,7 @@ function WorkerScreen() {
           ))}
         </TableBody>
       </Table>
-    </>
+    </Box>
   );
 }
 

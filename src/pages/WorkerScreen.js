@@ -12,12 +12,12 @@ import {
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
 
-function WorkerScreen({ loggedInUserData }) {
+function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
   const handleCheckIn = () => {
-    console.log(loggedInUserData);
+    console.log(userData);
 
     const sites = [
       {

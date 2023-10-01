@@ -77,6 +77,7 @@ function WorkerScreen() {
           } else {
             navigator.geolocation.getCurrentPosition(
               (position) => {
+                setGpsStatus("detecting");
                 const { latitude, longitude } = position.coords;
                 console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
                 checkSite(latitude, longitude);
@@ -104,6 +105,7 @@ function WorkerScreen() {
   ];
 
   const statusMessages = {
+    detecting: "Detecting your location. Please wait.",
     "on-site": `You're at ${siteName}. Ready to check in/out.`,
     "on-elsewhere":
       "You're not at any work site. If you're at a work site, please contact support.",

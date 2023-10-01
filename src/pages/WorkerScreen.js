@@ -1,106 +1,133 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
+  Box,
   Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { onChildAdded, ref } from "firebase/database";
-import { database } from "../firebase";
 
-const DB_LOGGED_IN_USER_KEY = "logged_in_user";
-
-function WorkerScreen() {
-  const [loggedInUser, setLoggedInUser] = useState([]);
+function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
-  useEffect(() => {
-    const loggedInUserRef = ref(database, DB_LOGGED_IN_USER_KEY);
-    onChildAdded(loggedInUserRef, (data) => {
-      setLoggedInUser((prevData) => [
-        ...prevData,
-        { key: data.key, val: data.val() },
-      ]);
-    });
+  const sites = [
+    {
+      name: "Tanjong Pagar MRT",
+      coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
+      radius: 1,
+    },
+    {
+      name: "Woodlands MRT",
+      coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
+      radius: 1,
+    },
+    {
+      name: "Singapore", // for debugging
+      coordinates: { lat: 1.283333, lng: 103.833333 },
+      radius: 99999,
+    },
+    // ...other sites
+  ];
 
-    const sites = [
-      {
-        name: "Tanjong Pagar MRT",
-        coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
-        radius: 1,
-      },
-      {
-        name: "Woodlands MRT",
-        coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
-        radius: 1,
-      },
-      // ...other sites
-    ];
+  const writeData = (site) => {
+    // This data can be written to database
+    console.log(`User ID: ${userData.userID}`);
+    console.log(`Site name: ${site.name}`);
+    const now = new Date().toISOString();
+    console.log(`Current datetime: ${now}`);
 
-    const checkSite = (lat, lng) => {
-      const userPoint = point([lat, lng]);
-      for (let site of sites) {
-        const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
-        const distance = findDistance(userPoint, sitePoint);
-        console.log(`Distance of ${distance} km from ${site.name}`);
-        if (distance < site.radius) {
-          setSiteName(site.name);
-          setGpsStatus("on-site");
+    // Not sure if these are needed
+    console.log(`User name: ${userData.username}`);
+    console.log(`User email: ${userData.email}`);
+  };
+
+  const checkSite = (lat, lng) => {
+    const userPoint = point([lat, lng]);
+    for (let site of sites) {
+      const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
+      const distance = findDistance(userPoint, sitePoint);
+      console.log(`Distance of ${distance} km from ${site.name}.`);
+      if (distance < site.radius) {
+        writeData(site);
+        setGpsStatus("on-site");
+        setSiteName(site.name);
+        return;
+      }
+    }
+    setGpsStatus("on-elsewhere");
+    setSiteName(null);
+  };
+
+  const handleCheckIn = () => {
+    if (!("geolocation" in navigator)) {
+      setGpsStatus("error-not-supported");
+      return;
+    }
+
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then(function (result) {
+        if (result.state === "denied") {
+          console.error("User must manually grant permissions.");
+          setGpsStatus("error-denied");
           return;
         }
-      }
-      setSiteName(null);
-      setGpsStatus("on-other");
-    };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log(
-            `Position detected at lat: ${latitude}, lng: ${longitude}`
-          );
-          checkSite(latitude, longitude);
-        },
-        (error) => {
-          console.error(error);
-          setGpsStatus("off");
-        },
-        { enableHighAccuracy: true }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
-  }, []);
-
-  console.log("loggedInUser:", loggedInUser);
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setGpsStatus("detecting");
+            const { latitude, longitude } = position.coords;
+            console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
+            checkSite(latitude, longitude);
+          },
+          (error) => {
+            console.error(error);
+            if (error.code === 1) {
+              setGpsStatus("error-denied");
+            } else {
+              setGpsStatus("error");
+            }
+          },
+          { enableHighAccuracy: true }
+        );
+      });
+  };
 
   const checkIns = [
     { location: "Site A", checkInTime: "08:00 AM", checkOutTime: "05:00 PM" },
     // ...other check-ins
   ];
 
-  let statusText;
-  switch (gpsStatus) {
-    case "on-site":
-      statusText = `GPS is on. You are at ${siteName}.`;
-      break;
-    case "on-other":
-      statusText = "GPS is on. You are not at any site.";
-      break;
-    default:
-      statusText = "GPS is off.";
-  }
+  const statusMessages = {
+    detecting: "Detecting your location. Please wait.",
+    "on-site": `Checked in/out at ${siteName}.`,
+    "on-elsewhere":
+      "You're not at any work site. If you're at a work site, please contact support.",
+    "error-denied":
+      "Please allow access to GPS so we can tell whether you're at a work site.",
+    error: "GPS error. Please contact support.",
+    "error-not-supported":
+      "GPS not supported. Please use a compatible browser.",
+  };
 
   return (
-    <>
-      <div>{statusText}</div>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        mb: 2,
+      }}
+    >
       <Button
+        onClick={handleCheckIn}
         variant="contained"
         sx={{
           borderRadius: "50%",
@@ -111,6 +138,9 @@ function WorkerScreen() {
       >
         Check In
       </Button>
+      {gpsStatus !== "off" && (
+        <Typography>{statusMessages[gpsStatus]}</Typography>
+      )}
       <Table>
         <TableHead>
           <TableRow>
@@ -129,7 +159,7 @@ function WorkerScreen() {
           ))}
         </TableBody>
       </Table>
-    </>
+    </Box>
   );
 }
 

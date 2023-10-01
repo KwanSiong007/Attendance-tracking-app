@@ -16,39 +16,37 @@ function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
-  const handleCheckIn = () => {
-    console.log(userData);
+  const sites = [
+    {
+      name: "Tanjong Pagar MRT",
+      coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
+      radius: 1,
+    },
+    {
+      name: "Woodlands MRT",
+      coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
+      radius: 1,
+    },
+    // ...other sites
+  ];
 
-    const sites = [
-      {
-        name: "Tanjong Pagar MRT",
-        coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
-        radius: 1,
-      },
-      {
-        name: "Woodlands MRT",
-        coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
-        radius: 1,
-      },
-      // ...other sites
-    ];
-
-    const checkSite = (lat, lng) => {
-      const userPoint = point([lat, lng]);
-      for (let site of sites) {
-        const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
-        const distance = findDistance(userPoint, sitePoint);
-        console.log(`Distance of ${distance} km from ${site.name}.`);
-        if (distance < site.radius) {
-          setSiteName(site.name);
-          setGpsStatus("on-site");
-          return;
-        }
+  const checkSite = (lat, lng) => {
+    const userPoint = point([lat, lng]);
+    for (let site of sites) {
+      const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
+      const distance = findDistance(userPoint, sitePoint);
+      console.log(`Distance of ${distance} km from ${site.name}.`);
+      if (distance < site.radius) {
+        setSiteName(site.name);
+        setGpsStatus("on-site");
+        return;
       }
-      setGpsStatus("on-elsewhere");
-      setSiteName(null);
-    };
+    }
+    setGpsStatus("on-elsewhere");
+    setSiteName(null);
+  };
 
+  const handleCheckIn = () => {
     if ("geolocation" in navigator) {
       navigator.permissions
         .query({ name: "geolocation" })

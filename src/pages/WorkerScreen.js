@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -11,32 +11,14 @@ import {
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { onChildAdded, ref } from "firebase/database";
-import { database } from "../firebase";
 
-const DB_LOGGED_IN_USER_KEY = "logged_in_user";
-
-function WorkerScreen() {
-  const [loggedInUser, setLoggedInUser] = useState([]);
+function WorkerScreen({ loggedInUserData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
-  useEffect(() => {
-    const loggedInUserRef = ref(database, DB_LOGGED_IN_USER_KEY);
-    onChildAdded(loggedInUserRef, (data) => {
-      setLoggedInUser((prevData) => [
-        ...prevData,
-        { key: data.key, val: data.val() },
-      ]);
-    });
-  }, []);
-
-  // for debugging
-  useEffect(() => {
-    console.log("loggedInUser:", loggedInUser);
-  }, [loggedInUser]);
-
   const handleCheckIn = () => {
+    console.log(loggedInUserData);
+
     const sites = [
       {
         name: "Tanjong Pagar MRT",

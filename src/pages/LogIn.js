@@ -121,7 +121,11 @@ function LogIn() {
     return (
       <div>
         <h1>Welcome back, {user.displayName}!</h1>
-        {isManager ? <ManagerScreen /> : <WorkerScreen />}
+        {isManager ? (
+          <ManagerScreen />
+        ) : (
+          <WorkerScreen userData={loggedInUserData} />
+        )}
         <div>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>

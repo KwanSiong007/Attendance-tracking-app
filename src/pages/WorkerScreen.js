@@ -31,9 +31,12 @@ function WorkerScreen() {
     });
   }, []);
 
-  console.log("loggedInUser:", loggedInUser);
+  // for debugging
+  useEffect(() => {
+    console.log("loggedInUser:", loggedInUser);
+  }, [loggedInUser]);
 
-  const handleGetLocation = () => {
+  const handleCheckIn = () => {
     const sites = [
       {
         name: "Tanjong Pagar MRT",
@@ -53,7 +56,7 @@ function WorkerScreen() {
       for (let site of sites) {
         const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
         const distance = findDistance(userPoint, sitePoint);
-        console.log(`Distance of ${distance} km from ${site.name}`);
+        console.log(`Distance of ${distance} km from ${site.name}.`);
         if (distance < site.radius) {
           setSiteName(site.name);
           setGpsStatus("on-site");
@@ -64,25 +67,32 @@ function WorkerScreen() {
       setSiteName(null);
     };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log(
-            `Position detected at lat: ${latitude}, lng: ${longitude}`
-          );
-          checkSite(latitude, longitude);
-        },
-        (error) => {
-          console.error(error);
-          if (error.code === 1) {
+    if ("geolocation" in navigator) {
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then(function (result) {
+          if (result.state === "denied") {
+            console.error("User must manually grant permissions.");
             setGpsStatus("error-denied");
           } else {
-            setGpsStatus("error");
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
+                checkSite(latitude, longitude);
+              },
+              (error) => {
+                console.error(error);
+                if (error.code === 1) {
+                  setGpsStatus("error-denied");
+                } else {
+                  setGpsStatus("error");
+                }
+              },
+              { enableHighAccuracy: true }
+            );
           }
-        },
-        { enableHighAccuracy: true }
-      );
+        });
     } else {
       setGpsStatus("error-not-supported");
     }
@@ -114,19 +124,8 @@ function WorkerScreen() {
         mb: 2,
       }}
     >
-      {gpsStatus !== "off" && (
-        <Typography>{statusMessages[gpsStatus]}</Typography>
-      )}
-      {!["on-site", "on-elsewhere"].includes(gpsStatus) && (
-        <Button
-          onClick={handleGetLocation}
-          variant="outlined"
-          sx={{ textTransform: "none" }}
-        >
-          Get Location
-        </Button>
-      )}
       <Button
+        onClick={handleCheckIn}
         variant="contained"
         sx={{
           borderRadius: "50%",
@@ -137,6 +136,9 @@ function WorkerScreen() {
       >
         Check In
       </Button>
+      {gpsStatus !== "off" && (
+        <Typography>{statusMessages[gpsStatus]}</Typography>
+      )}
       <Table>
         <TableHead>
           <TableRow>

@@ -11,6 +11,10 @@ import {
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
+import { push, ref, set } from "firebase/database";
+import { database } from "../firebase";
+
+const DB_ATTENDANCE_RECORDS_KEY = "attendance-records";
 
 function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
@@ -35,16 +39,47 @@ function WorkerScreen({ userData }) {
     // ...other sites
   ];
 
-  const writeData = (site) => {
+  const writeDataTo = (site) => {
     // This data can be written to database
-    console.log(`User ID: ${userData.userID}`);
+    console.log(`User name: ${userData.username}`);
     console.log(`Site name: ${site.name}`);
-    const now = new Date().toISOString();
-    console.log(`Current datetime: ${now}`);
+    const dateInSG = new Date().toLocaleDateString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    console.log(`Current date: ${dateInSG}`);
+    const currentTimeInSG = new Date().toLocaleTimeString("en-US", {
+      timeZone: "Asia/Singapore",
+      timeStyle: "short",
+    });
+    console.log("currentTimeInSG:", currentTimeInSG);
 
     // Not sure if these are needed
-    console.log(`User name: ${userData.username}`);
     console.log(`User email: ${userData.email}`);
+    console.log(`User ID: ${userData.userID}`);
+    const nowInSG = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    console.log(`Current datetime: ${nowInSG}`);
+  };
+
+  const writeData = async (site) => {
+    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const newRecordsRef = push(recordsRef);
+    // Get the unique key of the new attendance records
+    const newRecordsKey = newRecordsRef.key;
+    console.log("newRecordsKey:", newRecordsKey);
+    //The `set` function sets the value of the new reference (in this case, newRecordsKey) to a specific value.
+    await set(newRecordsRef, {
+      username: userData.username,
+      worksite: site.name,
+      currentDate: new Date().toLocaleDateString("en-US", {
+        timeZone: "Asia/Singapore",
+      }),
+      clockInTime: new Date().toLocaleTimeString("en-US", {
+        timeZone: "Asia/Singapore",
+        timeStyle: "short",
+      }),
+    });
   };
 
   const checkSite = (lat, lng) => {
@@ -54,6 +89,7 @@ function WorkerScreen({ userData }) {
       const distance = findDistance(userPoint, sitePoint);
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
+        writeDataTo(site);
         writeData(site);
         setGpsStatus("on-site");
         setSiteName(site.name);

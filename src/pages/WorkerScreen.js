@@ -27,8 +27,25 @@ function WorkerScreen({ userData }) {
       coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
       radius: 1,
     },
+    {
+      name: "Singapore", // for debugging
+      coordinates: { lat: 1.283333, lng: 103.833333 },
+      radius: 99999,
+    },
     // ...other sites
   ];
+
+  const writeData = (site) => {
+    // This data can be written to database
+    console.log(`User ID: ${userData.userID}`);
+    console.log(`Site name: ${site.name}`);
+    const now = new Date().toISOString();
+    console.log(`Current datetime: ${now}`);
+
+    // Not sure if these are needed
+    console.log(`User name: ${userData.username}`);
+    console.log(`User email: ${userData.email}`);
+  };
 
   const checkSite = (lat, lng) => {
     const userPoint = point([lat, lng]);
@@ -37,8 +54,9 @@ function WorkerScreen({ userData }) {
       const distance = findDistance(userPoint, sitePoint);
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
-        setSiteName(site.name);
+        writeData(site);
         setGpsStatus("on-site");
+        setSiteName(site.name);
         return;
       }
     }
@@ -47,36 +65,38 @@ function WorkerScreen({ userData }) {
   };
 
   const handleCheckIn = () => {
-    if ("geolocation" in navigator) {
-      navigator.permissions
-        .query({ name: "geolocation" })
-        .then(function (result) {
-          if (result.state === "denied") {
-            console.error("User must manually grant permissions.");
-            setGpsStatus("error-denied");
-          } else {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                setGpsStatus("detecting");
-                const { latitude, longitude } = position.coords;
-                console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
-                checkSite(latitude, longitude);
-              },
-              (error) => {
-                console.error(error);
-                if (error.code === 1) {
-                  setGpsStatus("error-denied");
-                } else {
-                  setGpsStatus("error");
-                }
-              },
-              { enableHighAccuracy: true }
-            );
-          }
-        });
-    } else {
+    if (!("geolocation" in navigator)) {
       setGpsStatus("error-not-supported");
+      return;
     }
+
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then(function (result) {
+        if (result.state === "denied") {
+          console.error("User must manually grant permissions.");
+          setGpsStatus("error-denied");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setGpsStatus("detecting");
+            const { latitude, longitude } = position.coords;
+            console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
+            checkSite(latitude, longitude);
+          },
+          (error) => {
+            console.error(error);
+            if (error.code === 1) {
+              setGpsStatus("error-denied");
+            } else {
+              setGpsStatus("error");
+            }
+          },
+          { enableHighAccuracy: true }
+        );
+      });
   };
 
   const checkIns = [
@@ -86,7 +106,7 @@ function WorkerScreen({ userData }) {
 
   const statusMessages = {
     detecting: "Detecting your location. Please wait.",
-    "on-site": `You're at ${siteName}. Ready to check in/out.`,
+    "on-site": `Checked in/out at ${siteName}.`,
     "on-elsewhere":
       "You're not at any work site. If you're at a work site, please contact support.",
     "error-denied":

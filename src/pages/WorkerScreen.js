@@ -11,6 +11,20 @@ import {
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
+import {
+  push,
+  ref,
+  set,
+  query,
+  orderByChild,
+  get,
+  update,
+  startAt,
+  endAt,
+} from "firebase/database";
+import { database } from "../firebase";
+
+const DB_ATTENDANCE_RECORDS_KEY = "action";
 
 function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
@@ -35,16 +49,76 @@ function WorkerScreen({ userData }) {
     // ...other sites
   ];
 
-  const writeData = (site) => {
+  const writeDataTo = (site) => {
     // This data can be written to database
-    console.log(`User ID: ${userData.userID}`);
+    console.log(`User name: ${userData.username}`);
     console.log(`Site name: ${site.name}`);
     const now = new Date().toISOString();
-    console.log(`Current datetime: ${now}`);
+    console.log(`Current datetime_toISOString: ${now}`);
+    const nowInSG = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    console.log(`Current datetime_toLocaleString: ${nowInSG}`);
+    const dateInSG = new Date().toLocaleDateString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    console.log(`Current date: ${dateInSG}`);
+    const currentTimeInSG = new Date().toLocaleTimeString("en-US", {
+      timeZone: "Asia/Singapore",
+      timeStyle: "short",
+    });
+    console.log("currentTimeInSG:", currentTimeInSG);
 
     // Not sure if these are needed
-    console.log(`User name: ${userData.username}`);
     console.log(`User email: ${userData.email}`);
+    console.log(`User ID: ${userData.userID}`);
+  };
+
+  const writeData = async (site) => {
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    //compoundKey used to uniquely identify attendance records for a specific user, at a specific worksite, on a specific date.
+    const compoundKey = `${userData.username}_${site.name}_${currentDate}`;
+
+    //This line creates a reference (recordsRef) to a location in the Firebase Realtime Database specified by the DB_ATTENDANCE_RECORDS_KEY. This is where attendance records will be stored.
+    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    //we set up a query (queryRef) to check if an attendance record for the same user, worksite, and date already exists.
+    //We use the orderByChild("compoundKey") to order the records by the compoundKey field and then use startAt and endAt to find records that match the compoundKey.
+    const queryRef = query(
+      recordsRef,
+      orderByChild("compoundKey"),
+      startAt(compoundKey),
+      endAt(compoundKey)
+    );
+    //This line executes the query and retrieves any existing attendance records that match the compoundKey.
+    //The results are stored in the existingRecords variable.
+    const existingRecords = await get(queryRef);
+    //it checks if there are no existing records for the same user, worksite, and date.
+    if (existingRecords.size === 0) {
+      //If no existing records are found, this line generates a new reference with a unique key within the recordsRef, which is essentially creating a new attendance record.
+      const newRecordsRef = push(recordsRef);
+      //store the new attendance record data in the database
+      await set(newRecordsRef, {
+        compoundKey: compoundKey, // Store the compound key for querying
+        username: userData.username,
+        worksite: site.name,
+        checkInDateTime: new Date().toISOString(),
+      });
+    } else {
+      //If existing records are found, this code iterates through them using a forEach loop.
+      existingRecords.forEach((record) => {
+        //Inside the loop, a reference (recordRef) is created to the specific attendance record that needs to be updated.
+        const recordRef = ref(
+          database,
+          `${DB_ATTENDANCE_RECORDS_KEY}/${record.key}`
+        );
+        //The update function is used to add or update the checkOutDateTime field of the existing attendance record to mark the check-out time.
+        update(recordRef, {
+          checkOutDateTime: new Date().toISOString(),
+        });
+      });
+    }
   };
 
   const checkSite = (lat, lng) => {
@@ -54,6 +128,7 @@ function WorkerScreen({ userData }) {
       const distance = findDistance(userPoint, sitePoint);
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
+        writeDataTo(site);
         writeData(site);
         setGpsStatus("on-site");
         setSiteName(site.name);

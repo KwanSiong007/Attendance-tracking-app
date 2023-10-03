@@ -49,31 +49,6 @@ function WorkerScreen({ userData }) {
     // ...other sites
   ];
 
-  const writeDataTo = (site) => {
-    // This data can be written to database
-    console.log(`User name: ${userData.username}`);
-    console.log(`Site name: ${site.name}`);
-    const now = new Date().toISOString();
-    console.log(`Current datetime_toISOString: ${now}`);
-    const nowInSG = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Singapore",
-    });
-    console.log(`Current datetime_toLocaleString: ${nowInSG}`);
-    const dateInSG = new Date().toLocaleDateString("en-US", {
-      timeZone: "Asia/Singapore",
-    });
-    console.log(`Current date: ${dateInSG}`);
-    const currentTimeInSG = new Date().toLocaleTimeString("en-US", {
-      timeZone: "Asia/Singapore",
-      timeStyle: "short",
-    });
-    console.log("currentTimeInSG:", currentTimeInSG);
-
-    // Not sure if these are needed
-    console.log(`User email: ${userData.email}`);
-    console.log(`User ID: ${userData.userID}`);
-  };
-
   const writeData = async (site) => {
     const currentDate = new Date().toLocaleDateString("en-US", {
       timeZone: "Asia/Singapore",
@@ -128,7 +103,6 @@ function WorkerScreen({ userData }) {
       const distance = findDistance(userPoint, sitePoint);
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
-        writeDataTo(site);
         writeData(site);
         setGpsStatus("on-site");
         setSiteName(site.name);

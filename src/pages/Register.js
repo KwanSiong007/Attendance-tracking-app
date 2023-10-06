@@ -119,7 +119,10 @@ function Register() {
         <Typography variant="h5">Company Attendance Tracker</Typography>
         <Box
           component="form"
-          onSubmit={registerUser}
+          onSubmit={(e) => {
+            e.preventDefault();
+            registerUser();
+          }}
           width="100%"
           sx={{
             display: "flex",

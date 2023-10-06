@@ -149,7 +149,10 @@ function LogIn() {
         <Typography variant="h5">Company Attendance Tracker</Typography>
         <Box
           component="form"
-          onSubmit={signInUser}
+          onSubmit={(e) => {
+            e.preventDefault();
+            signInUser();
+          }}
           width="100%"
           sx={{
             display: "flex",

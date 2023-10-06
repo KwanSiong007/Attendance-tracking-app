@@ -142,11 +142,23 @@ function LogIn() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          mt: 8,
+          mt: 5,
+          gap: 2,
         }}
       >
         <Typography variant="h5">Company Attendance Tracker</Typography>
-        <Box component="form" onSubmit={signInUser} sx={{ mt: 3 }} noValidate>
+        <Box
+          component="form"
+          onSubmit={signInUser}
+          width="100%"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+          noValidate
+        >
           <TextField
             margin="normal"
             required
@@ -179,9 +191,8 @@ function LogIn() {
             Log In
           </Button>
         </Box>
-        <br />
         <div>
-          Don't have an account? <Link to="/register">Register</Link>
+          Need an account? <Link to="/register">Register</Link>
         </div>
       </Box>
     </Container>

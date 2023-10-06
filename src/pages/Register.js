@@ -11,15 +11,22 @@ import {
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
 import { push, ref, set } from "firebase/database";
-import { database } from "../firebase"; // Import Firebase database instance
+import { database, storage } from "../firebase";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 const DB_PROFILE_KEY = "profile-data";
+const STORAGE_PROFILE_KEY = "profile-data/";
 
 function Register() {
   const [state, setState] = useState({
     username: "",
     email: "",
     password: "",
+    profilePicture: null,
   });
   const [passwordError, setPasswordError] = useState(false);
 
@@ -27,28 +34,35 @@ function Register() {
     try {
       const user = await register(state.email, state.password);
 
-      // Update the user's profile with the provided username
-      await updateProfile(user, {
-        displayName: state.username,
-      });
-
-      // UPDATE profileData, which are username & email to the realtime database.
-      const profileData = {
-        username: state.username,
-        email: state.email,
-      };
-      console.log("profileData:", profileData);
-      const profileRef = ref(database, DB_PROFILE_KEY);
-
-      // Create a new profile entry in the database
-      const newProfileRef = push(profileRef);
-      // Set the profile data
-      set(newProfileRef, profileData);
-
+      if (state.profilePicture) {
+        const fullStorageRef = storageRef(
+          storage,
+          STORAGE_PROFILE_KEY + state.profilePicture.name
+        );
+        await uploadBytes(fullStorageRef, state.profilePicture);
+        const url = await getDownloadURL(
+          fullStorageRef,
+          state.profilePicture.name
+        );
+        await updateProfile(user, {
+          displayName: state.username,
+          photoURL: url,
+        });
+        const profileData = {
+          username: state.username,
+          email: state.email,
+          profilePictureUrl: url,
+        };
+        console.log("profileData:", profileData);
+        const profileRef = ref(database, DB_PROFILE_KEY);
+        const newProfileRef = push(profileRef);
+        set(newProfileRef, profileData);
+      }
       setState({
         email: "",
         password: "",
         username: "",
+        profilePicture: null,
       });
       console.log("User registered:", user);
     } catch (error) {
@@ -67,12 +81,19 @@ function Register() {
       [name]: value,
     });
 
-    // Check for minimum password length
     if (name === "password" && value.length < 8) {
       setPasswordError(true);
     } else {
       setPasswordError(false);
     }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]; // Get the first selected file
+    setState({
+      ...state,
+      profilePicture: file,
+    });
   };
 
   //The error prop in the password TextField is set to passwordError, which will make the field turn red and display the error message when passwordError is true.
@@ -100,6 +121,39 @@ function Register() {
             value={state.username}
             onChange={(e) => handleChange(e)}
           />
+          <div>
+            <label style={{ display: "block" }}>Profile Picture:</label>
+            <input
+              accept="image/*"
+              style={{ display: "none" }}
+              id="file-upload"
+              type="file"
+              onChange={(e) => handleFileUpload(e)}
+            />
+            <label htmlFor="file-upload">
+              <Button
+                component="span"
+                variant="outlined"
+                color="primary"
+                sx={{
+                  mt: 1,
+                  height: "35px",
+                  width: "115px",
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  textTransform: "none",
+                }}
+              >
+                Choose File
+              </Button>
+            </label>
+            {/* Display "No file chosen" when no file is selected */}
+            {state.profilePicture ? (
+              <span>{state.profilePicture.name}</span>
+            ) : (
+              <span>No file chosen</span>
+            )}
+          </div>
           <TextField
             margin="normal"
             required

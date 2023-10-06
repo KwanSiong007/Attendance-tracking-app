@@ -5,9 +5,12 @@ import {
   Button,
   Container,
   CssBaseline,
+  InputLabel,
   TextField,
   Typography,
 } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import Image from "mui-image";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
 import { push, ref, set } from "firebase/database";
@@ -17,6 +20,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import { VisuallyHiddenInput } from "../utils";
 
 const DB_PROFILE_KEY = "profile-data";
 const STORAGE_PROFILE_KEY = "profile-data/";
@@ -26,7 +30,8 @@ function Register() {
     username: "",
     email: "",
     password: "",
-    profilePicture: null,
+    photo: null,
+    photoPreviewURL: null,
   });
   const [passwordError, setPasswordError] = useState(false);
 
@@ -34,16 +39,13 @@ function Register() {
     try {
       const user = await register(state.email, state.password);
 
-      if (state.profilePicture) {
+      if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
-          STORAGE_PROFILE_KEY + state.profilePicture.name
+          STORAGE_PROFILE_KEY + state.photo.name
         );
-        await uploadBytes(fullStorageRef, state.profilePicture);
-        const url = await getDownloadURL(
-          fullStorageRef,
-          state.profilePicture.name
-        );
+        await uploadBytes(fullStorageRef, state.photo);
+        const url = await getDownloadURL(fullStorageRef, state.photo.name);
         await updateProfile(user, {
           displayName: state.username,
           photoURL: url,
@@ -62,7 +64,7 @@ function Register() {
         email: "",
         password: "",
         username: "",
-        profilePicture: null,
+        photo: null,
       });
       console.log("User registered:", user);
     } catch (error) {
@@ -90,10 +92,15 @@ function Register() {
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; // Get the first selected file
-    setState({
-      ...state,
-      profilePicture: file,
-    });
+    if (file) {
+      const previewURL = URL.createObjectURL(file);
+
+      setState({
+        ...state,
+        photo: file,
+        photoPreviewURL: previewURL,
+      });
+    }
   };
 
   //The error prop in the password TextField is set to passwordError, which will make the field turn red and display the error message when passwordError is true.
@@ -105,11 +112,26 @@ function Register() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          mt: 8,
+          mt: 5,
+          gap: 2,
         }}
       >
         <Typography variant="h5">Company Attendance Tracker</Typography>
-        <Box component="form" sx={{ mt: 3 }} noValidate>
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            registerUser();
+          }}
+          width="100%"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+          noValidate
+        >
           <TextField
             margin="normal"
             required
@@ -121,39 +143,27 @@ function Register() {
             value={state.username}
             onChange={(e) => handleChange(e)}
           />
-          <div>
-            <label style={{ display: "block" }}>Profile Picture:</label>
-            <input
+          <InputLabel htmlFor="file-upload" sx={{ mt: 1 }}>
+            Profile Photo
+          </InputLabel>
+          {state.photo && (
+            <Image src={state.photoPreviewURL} width="200px" height="200px" />
+          )}
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            color="primary"
+            sx={{ textTransform: "none" }}
+          >
+            Upload Photo
+            <VisuallyHiddenInput
               accept="image/*"
-              style={{ display: "none" }}
               id="file-upload"
               type="file"
-              onChange={(e) => handleFileUpload(e)}
+              onChange={handleFileUpload}
             />
-            <label htmlFor="file-upload">
-              <Button
-                component="span"
-                variant="outlined"
-                color="primary"
-                sx={{
-                  mt: 1,
-                  height: "35px",
-                  width: "115px",
-                  display: "inline-block",
-                  verticalAlign: "middle",
-                  textTransform: "none",
-                }}
-              >
-                Choose File
-              </Button>
-            </label>
-            {/* Display "No file chosen" when no file is selected */}
-            {state.profilePicture ? (
-              <span>{state.profilePicture.name}</span>
-            ) : (
-              <span>No file chosen</span>
-            )}
-          </div>
+          </Button>
           <TextField
             margin="normal"
             required
@@ -181,21 +191,19 @@ function Register() {
             value={state.password}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             sx={{ mt: 3 }}
-            onClick={registerUser}
             disabled={passwordError}
           >
             Register
           </Button>
         </Box>
-        <br />
-        <div>
+        <Typography>
           Go back to <Link to="/">Log In</Link>
-        </div>
+        </Typography>
       </Box>
     </Container>
   );

@@ -5,9 +5,11 @@ import {
   Button,
   Container,
   CssBaseline,
+  InputLabel,
   TextField,
   Typography,
 } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
 import { push, ref, set } from "firebase/database";
@@ -17,6 +19,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import { VisuallyHiddenInput } from "../utils";
 
 const DB_PROFILE_KEY = "profile-data";
 const STORAGE_PROFILE_KEY = "profile-data/";
@@ -26,7 +29,8 @@ function Register() {
     username: "",
     email: "",
     password: "",
-    profilePicture: null,
+    photo: null,
+    photoPreviewURL: null,
   });
   const [passwordError, setPasswordError] = useState(false);
 
@@ -34,16 +38,13 @@ function Register() {
     try {
       const user = await register(state.email, state.password);
 
-      if (state.profilePicture) {
+      if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
-          STORAGE_PROFILE_KEY + state.profilePicture.name
+          STORAGE_PROFILE_KEY + state.photo.name
         );
-        await uploadBytes(fullStorageRef, state.profilePicture);
-        const url = await getDownloadURL(
-          fullStorageRef,
-          state.profilePicture.name
-        );
+        await uploadBytes(fullStorageRef, state.photo);
+        const url = await getDownloadURL(fullStorageRef, state.photo.name);
         await updateProfile(user, {
           displayName: state.username,
           photoURL: url,
@@ -62,7 +63,7 @@ function Register() {
         email: "",
         password: "",
         username: "",
-        profilePicture: null,
+        photo: null,
       });
       console.log("User registered:", user);
     } catch (error) {
@@ -92,7 +93,7 @@ function Register() {
     const file = e.target.files[0]; // Get the first selected file
     setState({
       ...state,
-      profilePicture: file,
+      photo: file,
     });
   };
 
@@ -121,39 +122,26 @@ function Register() {
             value={state.username}
             onChange={(e) => handleChange(e)}
           />
-          <div>
-            <label style={{ display: "block" }}>Profile Picture:</label>
-            <input
+          <InputLabel htmlFor="file-upload">Profile Photo:</InputLabel>
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            color="primary"
+            sx={{ textTransform: "none" }}
+          >
+            Choose File
+            <VisuallyHiddenInput
               accept="image/*"
-              style={{ display: "none" }}
               id="file-upload"
               type="file"
-              onChange={(e) => handleFileUpload(e)}
+              onChange={handleFileUpload}
             />
-            <label htmlFor="file-upload">
-              <Button
-                component="span"
-                variant="outlined"
-                color="primary"
-                sx={{
-                  mt: 1,
-                  height: "35px",
-                  width: "115px",
-                  display: "inline-block",
-                  verticalAlign: "middle",
-                  textTransform: "none",
-                }}
-              >
-                Choose File
-              </Button>
-            </label>
-            {/* Display "No file chosen" when no file is selected */}
-            {state.profilePicture ? (
-              <span>{state.profilePicture.name}</span>
-            ) : (
-              <span>No file chosen</span>
-            )}
-          </div>
+          </Button>
+          {/* Display "No file chosen" when no file is selected */}
+          <Typography>
+            {state.photo ? state.photo.name : "No file chosen"}
+          </Typography>
           <TextField
             margin="normal"
             required

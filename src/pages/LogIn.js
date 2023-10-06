@@ -146,7 +146,7 @@ function LogIn() {
         }}
       >
         <Typography variant="h5">Company Attendance Tracker</Typography>
-        <Box component="form" sx={{ mt: 3 }} noValidate>
+        <Box component="form" onSubmit={signInUser} sx={{ mt: 3 }} noValidate>
           <TextField
             margin="normal"
             required
@@ -170,12 +170,11 @@ function LogIn() {
             onChange={(e) => handleChange(e)}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             sx={{ mt: 3 }}
-            onClick={signInUser}
           >
             Log In
           </Button>

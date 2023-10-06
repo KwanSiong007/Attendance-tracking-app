@@ -119,6 +119,7 @@ function Register() {
         <Typography variant="h5">Company Attendance Tracker</Typography>
         <Box
           component="form"
+          onSubmit={registerUser}
           width="100%"
           sx={{
             display: "flex",
@@ -187,12 +188,11 @@ function Register() {
             value={state.password}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             sx={{ mt: 3 }}
-            onClick={registerUser}
             disabled={passwordError}
           >
             Register

@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import Image from "mui-image";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
 import { push, ref, set } from "firebase/database";
@@ -91,10 +92,15 @@ function Register() {
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; // Get the first selected file
-    setState({
-      ...state,
-      photo: file,
-    });
+    if (file) {
+      const previewURL = URL.createObjectURL(file);
+
+      setState({
+        ...state,
+        photo: file,
+        photoPreviewURL: previewURL,
+      });
+    }
   };
 
   //The error prop in the password TextField is set to passwordError, which will make the field turn red and display the error message when passwordError is true.
@@ -106,11 +112,22 @@ function Register() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          mt: 8,
+          mt: 5,
+          gap: 2,
         }}
       >
         <Typography variant="h5">Company Attendance Tracker</Typography>
-        <Box component="form" sx={{ mt: 3 }} noValidate>
+        <Box
+          component="form"
+          width="100%"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+          noValidate
+        >
           <TextField
             margin="normal"
             required
@@ -122,7 +139,12 @@ function Register() {
             value={state.username}
             onChange={(e) => handleChange(e)}
           />
-          <InputLabel htmlFor="file-upload">Profile Photo:</InputLabel>
+          <InputLabel htmlFor="file-upload" sx={{ mt: 1 }}>
+            Profile Photo
+          </InputLabel>
+          {state.photo && (
+            <Image src={state.photoPreviewURL} width="200px" height="200px" />
+          )}
           <Button
             component="label"
             variant="outlined"
@@ -130,7 +152,7 @@ function Register() {
             color="primary"
             sx={{ textTransform: "none" }}
           >
-            Choose File
+            Upload Photo
             <VisuallyHiddenInput
               accept="image/*"
               id="file-upload"
@@ -138,10 +160,6 @@ function Register() {
               onChange={handleFileUpload}
             />
           </Button>
-          {/* Display "No file chosen" when no file is selected */}
-          <Typography>
-            {state.photo ? state.photo.name : "No file chosen"}
-          </Typography>
           <TextField
             margin="normal"
             required
@@ -180,10 +198,9 @@ function Register() {
             Register
           </Button>
         </Box>
-        <br />
-        <div>
+        <Typography>
           Go back to <Link to="/">Log In</Link>
-        </div>
+        </Typography>
       </Box>
     </Container>
   );

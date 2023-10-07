@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -19,7 +19,7 @@ import {
   query,
   orderByChild,
   equalTo,
-  get,
+  onValue,
   update,
 } from "firebase/database";
 import { database } from "../firebase";
@@ -32,7 +32,7 @@ function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
-  const fetchAttendance = useCallback(async () => {
+  useEffect(() => {
     const todaySGT = extractDaySGT(new Date());
 
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
@@ -42,35 +42,32 @@ function WorkerScreen({ userData }) {
       equalTo(`${userData.userID}_${todaySGT}`)
     );
 
-    try {
-      const snapshot = await get(q);
-      let checkedIn = false;
-      let recordId = null;
-      if (snapshot.exists()) {
-        snapshot.forEach((childSnapshot) => {
-          const record = childSnapshot.val();
-          if (!record.checkOutDateTime) {
-            checkedIn = true;
-            recordId = childSnapshot.key;
-          }
-        });
+    const unsubscribe = onValue(
+      q,
+      (snapshot) => {
+        let checkedIn = false;
+        let recordId = null;
+
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            const record = childSnapshot.val();
+            if (!record.checkOutDateTime) {
+              checkedIn = true;
+              recordId = childSnapshot.key;
+            }
+          });
+        }
+
+        setCheckedIn(checkedIn);
+        setRecordId(recordId);
+      },
+      {
+        onlyOnce: false,
       }
-      return { recordId: recordId, checkedIn: checkedIn };
-    } catch (error) {
-      console.error("Error fetching records: ", error);
-      return { recordId: null, checkedIn: null };
-    }
+    );
+
+    return () => unsubscribe();
   }, [userData.userID]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { recordId, checkedIn } = await fetchAttendance();
-      setRecordId(recordId);
-      setCheckedIn(checkedIn);
-    };
-
-    fetchData();
-  }, [fetchAttendance]);
 
   const sites = [
     {

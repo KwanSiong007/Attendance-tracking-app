@@ -21,7 +21,6 @@ function ManagerScreen() {
           attendance.push(row);
         });
 
-        console.log(attendance);
         const sortedAttendance = [...attendance].sort(
           (a, b) =>
             Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)

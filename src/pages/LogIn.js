@@ -120,7 +120,7 @@ function LogIn() {
 
     return (
       <div>
-        <h1>Welcome back, {user.displayName}!</h1>
+        <h1>Welcome, {user.displayName}!</h1>
         {isManager ? (
           <ManagerScreen />
         ) : (

@@ -30,17 +30,18 @@ const showTimeDiff = (isoStart, isoEnd) => {
 
   const start = parseISO(isoStart);
   const end = parseISO(isoEnd);
-  const diffHours = differenceInHours(end, start);
-  const diffMinutes = differenceInMinutes(end, start) % 60;
+  const hoursDiff = differenceInHours(end, start);
+  const minsDiff = differenceInMinutes(end, start) % 60;
 
-  if (diffHours === 0) {
-    return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
-  } else if (diffMinutes === 0) {
-    return `${diffHours} hour${diffHours === 1 ? "" : "s"}`;
+  const hoursStr = `${hoursDiff} hour${hoursDiff === 1 ? "" : "s"}`;
+  const minsStr = `${minsDiff} min${minsDiff === 1 ? "" : "s"}`;
+
+  if (hoursDiff === 0) {
+    return minsStr;
+  } else if (minsDiff === 0) {
+    return hoursStr;
   } else {
-    return `${diffHours} hour${
-      diffHours === 1 ? "" : "s"
-    } ${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
+    return hoursStr + " " + minsStr;
   }
 };
 

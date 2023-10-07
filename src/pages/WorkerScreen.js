@@ -37,9 +37,10 @@ const GPS_STATUS = {
 
 function WorkerScreen({ userData }) {
   const [checkedIn, setCheckedIn] = useState(null);
+  const [checkedInSite, setCheckedInSite] = useState(null);
   const [recordId, setRecordId] = useState(null);
   const [gpsStatus, setGpsStatus] = useState(GPS_STATUS.OFF);
-  const [site, setSite] = useState(null);
+  const [gpsSite, setGpsSite] = useState(null);
 
   useEffect(() => {
     const todaySGT = extractDaySGT(new Date());
@@ -70,7 +71,7 @@ function WorkerScreen({ userData }) {
 
         setCheckedIn(checkedIn);
         setRecordId(recordId);
-        setSite(site);
+        setCheckedInSite(site);
       },
       {
         onlyOnce: false,
@@ -123,11 +124,11 @@ function WorkerScreen({ userData }) {
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
         writeCheckIn(site);
-        setSite(site.name);
+        setGpsSite(site.name);
         return;
       }
     }
-    setSite(null);
+    setGpsSite(null);
   };
 
   const handleCheckIn = () => {
@@ -183,13 +184,11 @@ function WorkerScreen({ userData }) {
 
   const gpsStatusMsg = () => {
     switch (gpsStatus) {
-      case GPS_STATUS.OFF:
-        return "No access to GPS.";
       case GPS_STATUS.REQUESTING:
         return "Requesting access to GPS.";
       case GPS_STATUS.ON:
-        if (site) {
-          return `GPS on. You're at ${site}.`;
+        if (gpsSite) {
+          return `GPS on. You're at ${gpsSite}.`;
         } else {
           return "GPS on. You're not at any work site.";
         }
@@ -204,6 +203,14 @@ function WorkerScreen({ userData }) {
     }
   };
 
+  const attendanceMsg = () => {
+    if (checkedIn === true) {
+      return `You're checked in at ${checkedInSite}.`;
+    } else if (checkedIn === false) {
+      return "You're not checked in.";
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -214,6 +221,7 @@ function WorkerScreen({ userData }) {
         mb: 2,
       }}
     >
+      <Typography>{attendanceMsg()}</Typography>
       {checkedIn === false && (
         <Button
           onClick={handleCheckIn}

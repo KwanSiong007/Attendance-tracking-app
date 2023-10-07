@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { onChildAdded, ref } from "firebase/database";
 import { database } from "../firebase";
+import ManagerAttendance from "../components/ManagerAttendance";
 
 const DB_ATTENDANCE_RECORDS_KEY = "action";
 
@@ -24,7 +25,7 @@ function ManagerScreen() {
 
   console.log("records:", records);
 
-  return <div>ManagerScreen</div>;
+  return <ManagerAttendance />;
 }
 
 export default ManagerScreen;

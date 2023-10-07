@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { showDate, showTime, showTimeDiff } from "../utils";
 
-function AttendanceTable({ attendance }) {
+function WorkerAttendance({ attendance }) {
   return (
     <Table>
       <TableHead>
@@ -36,4 +36,4 @@ function AttendanceTable({ attendance }) {
   );
 }
 
-export default AttendanceTable;
+export default WorkerAttendance;

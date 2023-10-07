@@ -14,7 +14,7 @@ import {
   update,
 } from "firebase/database";
 import { database } from "../firebase";
-import AttendanceTable from "../components/AttendanceTable";
+import WorkerAttendance from "../components/WorkerAttendance";
 
 const DB_ATTENDANCE_RECORDS_KEY = "action";
 
@@ -254,7 +254,7 @@ function WorkerScreen({ userData }) {
         </Button>
       )}
       <Typography>{gpsStatusMsg()}</Typography>
-      <AttendanceTable attendance={attendance} />
+      <WorkerAttendance attendance={attendance} />
     </Box>
   );
 }

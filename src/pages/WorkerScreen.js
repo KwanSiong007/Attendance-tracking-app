@@ -7,10 +7,10 @@ import {
   push,
   ref,
   set,
+  onValue,
   query,
   orderByChild,
   equalTo,
-  onValue,
   update,
 } from "firebase/database";
 import { database } from "../firebase";
@@ -49,22 +49,20 @@ function WorkerScreen({ userData }) {
         let site = null;
         let recordId = null;
 
-        if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const record = childSnapshot.val();
-            attendance.push({
-              worksite: record.worksite,
-              checkInDateTime: record.checkInDateTime,
-              checkOutDateTime: record.checkOutDateTime,
-            });
-
-            if (!record.checkOutDateTime) {
-              checkedIn = true;
-              site = record.worksite;
-              recordId = childSnapshot.key;
-            }
+        snapshot.forEach((childSnapshot) => {
+          const row = childSnapshot.val();
+          attendance.push({
+            worksite: row.worksite,
+            checkInDateTime: row.checkInDateTime,
+            checkOutDateTime: row.checkOutDateTime,
           });
-        }
+
+          if (!row.checkOutDateTime) {
+            checkedIn = true;
+            site = row.worksite;
+            recordId = childSnapshot.key;
+          }
+        });
 
         const sortedAttendance = [...attendance].sort(
           (a, b) =>

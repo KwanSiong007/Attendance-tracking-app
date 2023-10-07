@@ -37,9 +37,9 @@ const showTimeDiff = (isoStart, isoEnd) => {
   const minsStr = `${minsDiff} min${minsDiff === 1 ? "" : "s"}`;
 
   if (hoursDiff === 0) {
-    return hoursStr;
-  } else if (minsDiff === 0) {
     return minsStr;
+  } else if (minsDiff === 0) {
+    return hoursStr;
   } else {
     return hoursStr + " " + minsStr;
   }

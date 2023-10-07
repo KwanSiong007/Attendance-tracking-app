@@ -46,7 +46,7 @@ function WorkerScreen({ userData }) {
       (snapshot) => {
         let attendance = [];
         let checkedIn = false;
-        let site = null;
+        let siteName = null;
         let recordId = null;
 
         snapshot.forEach((childSnapshot) => {
@@ -59,7 +59,7 @@ function WorkerScreen({ userData }) {
 
           if (!row.checkOutDateTime) {
             checkedIn = true;
-            site = row.worksite;
+            siteName = row.worksite;
             recordId = childSnapshot.key;
           }
         });
@@ -71,7 +71,7 @@ function WorkerScreen({ userData }) {
 
         setAttendance(sortedAttendance);
         setCheckedIn(checkedIn);
-        setCheckedInSite(site);
+        setCheckedInSite(siteName);
         setRecordId(recordId);
       },
       {
@@ -101,6 +101,58 @@ function WorkerScreen({ userData }) {
     // ...other sites
   ];
 
+  const checkLocation = (lat, lng) => {
+    const userPoint = point([lat, lng]);
+    for (let site of sites) {
+      const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
+      const distance = findDistance(userPoint, sitePoint);
+      console.log(`Distance of ${distance} km from ${site.name}.`);
+      if (distance < site.radius) {
+        setGpsSite(site.name);
+        return site;
+      }
+    }
+    setGpsSite(null);
+    return null;
+  };
+
+  const locateWorker = async () => {
+    if (!("geolocation" in navigator)) {
+      setGpsStatus(GPS_STATUS.NOT_SUPPORTED);
+      throw new Error("Geolocation not supported");
+    }
+
+    setGpsStatus(GPS_STATUS.REQUESTING);
+    const permission = await navigator.permissions.query({
+      name: "geolocation",
+    });
+    if (permission.state === "denied") {
+      setGpsStatus(GPS_STATUS.DENIED);
+      throw new Error("Geolocation permission denied");
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setGpsStatus(GPS_STATUS.ON);
+          const { latitude, longitude } = position.coords;
+          const site = checkLocation(latitude, longitude);
+          resolve(site);
+        },
+        (error) => {
+          console.error(error);
+          if (error.code === 1) {
+            setGpsStatus(GPS_STATUS.DENIED);
+          } else {
+            setGpsStatus(GPS_STATUS.ERROR);
+          }
+          reject(new Error("Geolocation error"));
+        },
+        { enableHighAccuracy: true }
+      );
+    });
+  };
+
   const writeCheckIn = (site) => {
     const searchKey = buildKey(userData.userID, new Date());
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
@@ -116,57 +168,18 @@ function WorkerScreen({ userData }) {
     });
   };
 
-  const checkSite = (lat, lng) => {
-    const userPoint = point([lat, lng]);
-    for (let site of sites) {
-      const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
-      const distance = findDistance(userPoint, sitePoint);
-      console.log(`Distance of ${distance} km from ${site.name}.`);
-      if (distance < site.radius) {
+  const handleCheckIn = async () => {
+    try {
+      const site = await locateWorker();
+      if (site) {
         writeCheckIn(site);
-        setGpsSite(site.name);
-        return;
       }
+    } catch (error) {
+      console.error(`Location retrieval failed: ${error.message}`);
     }
-    setGpsSite(null);
   };
 
-  const handleCheckIn = () => {
-    if (!("geolocation" in navigator)) {
-      setGpsStatus(GPS_STATUS.NOT_SUPPORTED);
-      return;
-    }
-
-    setGpsStatus(GPS_STATUS.REQUESTING);
-
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then(function (result) {
-        if (result.state === "denied") {
-          setGpsStatus(GPS_STATUS.DENIED);
-          return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setGpsStatus(GPS_STATUS.ON);
-            const { latitude, longitude } = position.coords;
-            checkSite(latitude, longitude);
-          },
-          (error) => {
-            console.error(error);
-            if (error.code === 1) {
-              setGpsStatus(GPS_STATUS.DENIED);
-            } else {
-              setGpsStatus(GPS_STATUS.ERROR);
-            }
-          },
-          { enableHighAccuracy: true }
-        );
-      });
-  };
-
-  const handleCheckOut = () => {
+  const writeCheckOut = () => {
     const recordRef = ref(database, `${DB_ATTENDANCE_RECORDS_KEY}/${recordId}`);
     setCheckedIn(false);
     setRecordId(null);
@@ -175,15 +188,28 @@ function WorkerScreen({ userData }) {
     });
   };
 
+  const handleCheckOut = async () => {
+    try {
+      const site = await locateWorker();
+      if (site?.name === checkedInSite) {
+        writeCheckOut();
+      }
+    } catch (error) {
+      console.error(`Location retrieval failed: ${error.message}`);
+    }
+  };
+
   const gpsStatusMsg = () => {
     switch (gpsStatus) {
       case GPS_STATUS.REQUESTING:
         return "Requesting location access.";
       case GPS_STATUS.ON:
-        if (gpsSite) {
-          return `Your current location is ${gpsSite}.`;
-        } else {
+        if (!gpsSite) {
           return "Your current location is not at a work site.";
+        } else if (checkedInSite && gpsSite !== checkedInSite) {
+          return `Your current location is ${gpsSite}. You must check out from ${checkedInSite}.`;
+        } else {
+          return `Your current location is ${gpsSite}.`;
         }
       case GPS_STATUS.NOT_SUPPORTED:
         return "Location access not supported. Please use a compatible browser.";

@@ -39,6 +39,7 @@ function WorkerScreen({ userData }) {
   const [checkedIn, setCheckedIn] = useState(null);
   const [checkedInSite, setCheckedInSite] = useState(null);
   const [recordId, setRecordId] = useState(null);
+
   const [gpsStatus, setGpsStatus] = useState(GPS_STATUS.OFF);
   const [gpsSite, setGpsSite] = useState(null);
 
@@ -55,23 +56,23 @@ function WorkerScreen({ userData }) {
       q,
       (snapshot) => {
         let checkedIn = false;
-        let recordId = null;
         let site = null;
+        let recordId = null;
 
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
             const record = childSnapshot.val();
             if (!record.checkOutDateTime) {
               checkedIn = true;
-              recordId = childSnapshot.key;
               site = record.worksite;
+              recordId = childSnapshot.key;
             }
           });
         }
 
         setCheckedIn(checkedIn);
-        setRecordId(recordId);
         setCheckedInSite(site);
+        setRecordId(recordId);
       },
       {
         onlyOnce: false,
@@ -185,19 +186,19 @@ function WorkerScreen({ userData }) {
   const gpsStatusMsg = () => {
     switch (gpsStatus) {
       case GPS_STATUS.REQUESTING:
-        return "Requesting access to GPS.";
+        return "Requesting location access.";
       case GPS_STATUS.ON:
         if (gpsSite) {
-          return `GPS on. You're at ${gpsSite}.`;
+          return `Your current location is ${gpsSite}.`;
         } else {
-          return "GPS on. You're not at any work site.";
+          return "Your current location is not at a work site.";
         }
       case GPS_STATUS.NOT_SUPPORTED:
-        return "GPS not supported. Please use a compatible browser.";
+        return "Location access not supported. Please use a compatible browser.";
       case GPS_STATUS.DENIED:
-        return "GPS access denied. Please grant access to confirm you're at a work site.";
+        return "Location access denied. Please grant access to confirm you're at a work site.";
       case GPS_STATUS.ERROR:
-        return "GPS error. Please contact support.";
+        return "Location access error. Please contact support.";
       default:
         return;
     }
@@ -205,9 +206,9 @@ function WorkerScreen({ userData }) {
 
   const attendanceMsg = () => {
     if (checkedIn === true) {
-      return `You're checked in at ${checkedInSite}.`;
+      return `Checked in at ${checkedInSite}.`;
     } else if (checkedIn === false) {
-      return "You're not checked in.";
+      return "Checked out.";
     }
   };
 

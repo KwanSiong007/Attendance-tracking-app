@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { extractDaySGT } from "../utils";
+import { buildKey, showDate, showTime, showTimeDiff } from "../utils";
 import {
   push,
   ref,
@@ -36,6 +36,7 @@ const GPS_STATUS = {
 };
 
 function WorkerScreen({ userData }) {
+  const [attendance, setAttendance] = useState([]);
   const [checkedIn, setCheckedIn] = useState(null);
   const [checkedInSite, setCheckedInSite] = useState(null);
   const [recordId, setRecordId] = useState(null);
@@ -44,17 +45,14 @@ function WorkerScreen({ userData }) {
   const [gpsSite, setGpsSite] = useState(null);
 
   useEffect(() => {
-    const todaySGT = extractDaySGT(new Date());
+    const searchKey = buildKey(userData.userID, new Date());
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
-    const q = query(
-      recordsRef,
-      orderByChild("checkInKey"),
-      equalTo(`${userData.userID}_${todaySGT}`)
-    );
+    const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
     const unsubscribe = onValue(
       q,
       (snapshot) => {
+        const attendance = [];
         let checkedIn = false;
         let site = null;
         let recordId = null;
@@ -62,6 +60,12 @@ function WorkerScreen({ userData }) {
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
             const record = childSnapshot.val();
+            attendance.push({
+              worksite: record.worksite,
+              checkInDateTime: record.checkInDateTime,
+              checkOutDateTime: record.checkOutDateTime,
+            });
+
             if (!record.checkOutDateTime) {
               checkedIn = true;
               site = record.worksite;
@@ -70,6 +74,8 @@ function WorkerScreen({ userData }) {
           });
         }
 
+        setAttendance(attendance);
+        console.log(attendance);
         setCheckedIn(checkedIn);
         setCheckedInSite(site);
         setRecordId(recordId);
@@ -102,8 +108,7 @@ function WorkerScreen({ userData }) {
   ];
 
   const writeCheckIn = (site) => {
-    const todaySGT = extractDaySGT(new Date());
-    const checkInKey = `${userData.userID}_${todaySGT}`;
+    const searchKey = buildKey(userData.userID, new Date());
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const newRecordRef = push(recordsRef);
 
@@ -111,7 +116,7 @@ function WorkerScreen({ userData }) {
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
       checkInDateTime: new Date().toISOString(),
-      checkInKey: checkInKey,
+      checkInKey: searchKey,
       username: userData.username,
       worksite: site.name,
     });
@@ -144,7 +149,6 @@ function WorkerScreen({ userData }) {
       .query({ name: "geolocation" })
       .then(function (result) {
         if (result.state === "denied") {
-          console.error("User must manually grant permissions.");
           setGpsStatus(GPS_STATUS.DENIED);
           return;
         }
@@ -153,7 +157,6 @@ function WorkerScreen({ userData }) {
           (position) => {
             setGpsStatus(GPS_STATUS.ON);
             const { latitude, longitude } = position.coords;
-            console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
             checkSite(latitude, longitude);
           },
           (error) => {
@@ -177,11 +180,6 @@ function WorkerScreen({ userData }) {
       checkOutDateTime: new Date().toISOString(),
     });
   };
-
-  const checkIns = [
-    { location: "Site A", checkInTime: "08:00 AM", checkOutTime: "05:00 PM" },
-    // ...other check-ins
-  ];
 
   const gpsStatusMsg = () => {
     switch (gpsStatus) {
@@ -211,6 +209,10 @@ function WorkerScreen({ userData }) {
       return "Checked out.";
     }
   };
+
+  const sortedAttendance = [...attendance].sort(
+    (a, b) => Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
+  );
 
   return (
     <Box
@@ -263,17 +265,23 @@ function WorkerScreen({ userData }) {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Location</TableCell>
-            <TableCell>Check-in Time</TableCell>
-            <TableCell>Check-out Time</TableCell>
+            <TableCell>Date</TableCell>
+            <TableCell>Work Site</TableCell>
+            <TableCell>Check In Time</TableCell>
+            <TableCell>Check Out Time</TableCell>
+            <TableCell>Duration Worked</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {checkIns.map((checkIn, index) => (
-            <TableRow key={index}>
-              <TableCell>{checkIn.location}</TableCell>
-              <TableCell>{checkIn.checkInTime}</TableCell>
-              <TableCell>{checkIn.checkOutTime}</TableCell>
+          {sortedAttendance.map((row) => (
+            <TableRow key={row.checkInDateTime}>
+              <TableCell>{showDate(row.checkInDateTime)}</TableCell>
+              <TableCell>{row.worksite}</TableCell>
+              <TableCell>{showTime(row.checkInDateTime)}</TableCell>
+              <TableCell>{showTime(row.checkOutDateTime)}</TableCell>
+              <TableCell>
+                {showTimeDiff(row.checkInDateTime, row.checkOutDateTime)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

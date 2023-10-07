@@ -1,9 +1,47 @@
-import { format } from "date-fns";
+import {
+  format,
+  parseISO,
+  differenceInHours,
+  differenceInMinutes,
+} from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 import { styled } from "@mui/material/styles";
 
-const extractDaySGT = (date) => {
-  return format(utcToZonedTime(date, "Asia/Singapore"), "yyyy-MM-dd");
+const buildKey = (userID, dateObj) => {
+  const dateStr = format(
+    utcToZonedTime(dateObj, "Asia/Singapore"),
+    "yyyy-MM-dd"
+  );
+  return `${userID}_${dateStr}`;
+};
+
+const showDate = (isoString) => {
+  return format(parseISO(isoString), "EEE, d MMM");
+};
+
+const showTime = (isoString) => {
+  return isoString ? format(parseISO(isoString), "h:mm aa") : "";
+};
+
+const showTimeDiff = (isoStart, isoEnd) => {
+  if (!isoEnd) {
+    return "";
+  }
+
+  const start = parseISO(isoStart);
+  const end = parseISO(isoEnd);
+  const diffHours = differenceInHours(end, start);
+  const diffMinutes = differenceInMinutes(end, start) % 60;
+
+  if (diffHours === 0) {
+    return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
+  } else if (diffMinutes === 0) {
+    return `${diffHours} hour${diffHours === 1 ? "" : "s"}`;
+  } else {
+    return `${diffHours} hour${
+      diffHours === 1 ? "" : "s"
+    } ${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
+  }
 };
 
 const VisuallyHiddenInput = styled("input")({
@@ -18,4 +56,4 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export { extractDaySGT, VisuallyHiddenInput };
+export { buildKey, showDate, showTime, showTimeDiff, VisuallyHiddenInput };

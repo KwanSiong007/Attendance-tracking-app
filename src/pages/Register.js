@@ -39,27 +39,32 @@ function Register() {
     try {
       const user = await register(state.email, state.password);
 
+      let photoURL = null;
       if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
           STORAGE_PROFILE_KEY + state.photo.name
         );
         await uploadBytes(fullStorageRef, state.photo);
-        const url = await getDownloadURL(fullStorageRef, state.photo.name);
-        await updateProfile(user, {
-          displayName: state.username,
-          photoURL: url,
-        });
-        const profileData = {
-          username: state.username,
-          email: state.email,
-          profilePictureUrl: url,
-        };
-        console.log("profileData:", profileData);
-        const profileRef = ref(database, DB_PROFILE_KEY);
-        const newProfileRef = push(profileRef);
-        set(newProfileRef, profileData);
+        photoURL = await getDownloadURL(fullStorageRef, state.photo.name);
       }
+
+      await updateProfile(user, {
+        displayName: state.username,
+        photoURL,
+      });
+
+      const profileData = {
+        username: state.username,
+        email: state.email,
+        profilePictureUrl: photoURL,
+      };
+
+      console.log("profileData:", profileData);
+      const profileRef = ref(database, DB_PROFILE_KEY);
+      const newProfileRef = push(profileRef);
+      set(newProfileRef, profileData);
+
       setState({
         email: "",
         password: "",
@@ -162,6 +167,7 @@ function Register() {
               id="file-upload"
               type="file"
               onChange={handleFileUpload}
+              tabIndex="-1"
             />
           </Button>
           <TextField

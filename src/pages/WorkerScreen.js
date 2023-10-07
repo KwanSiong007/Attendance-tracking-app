@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { buildKey, showDate, showTime, showTimeDiff } from "../utils";
+import { buildKey } from "../utils";
 import {
   push,
   ref,
@@ -23,6 +14,7 @@ import {
   update,
 } from "firebase/database";
 import { database } from "../firebase";
+import AttendanceTable from "../components/AttendanceTable";
 
 const DB_ATTENDANCE_RECORDS_KEY = "action";
 
@@ -52,7 +44,7 @@ function WorkerScreen({ userData }) {
     const unsubscribe = onValue(
       q,
       (snapshot) => {
-        const attendance = [];
+        let attendance = [];
         let checkedIn = false;
         let site = null;
         let recordId = null;
@@ -74,8 +66,12 @@ function WorkerScreen({ userData }) {
           });
         }
 
-        setAttendance(attendance);
-        console.log(attendance);
+        const sortedAttendance = [...attendance].sort(
+          (a, b) =>
+            Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
+        );
+
+        setAttendance(sortedAttendance);
         setCheckedIn(checkedIn);
         setCheckedInSite(site);
         setRecordId(recordId);
@@ -210,10 +206,6 @@ function WorkerScreen({ userData }) {
     }
   };
 
-  const sortedAttendance = [...attendance].sort(
-    (a, b) => Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
-  );
-
   return (
     <Box
       sx={{
@@ -262,30 +254,7 @@ function WorkerScreen({ userData }) {
         </Button>
       )}
       <Typography>{gpsStatusMsg()}</Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell>Work Site</TableCell>
-            <TableCell>Check In Time</TableCell>
-            <TableCell>Check Out Time</TableCell>
-            <TableCell>Duration Worked</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedAttendance.map((row) => (
-            <TableRow key={row.checkInDateTime}>
-              <TableCell>{showDate(row.checkInDateTime)}</TableCell>
-              <TableCell>{row.worksite}</TableCell>
-              <TableCell>{showTime(row.checkInDateTime)}</TableCell>
-              <TableCell>{showTime(row.checkOutDateTime)}</TableCell>
-              <TableCell>
-                {showTimeDiff(row.checkInDateTime, row.checkOutDateTime)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <AttendanceTable attendance={attendance} />
     </Box>
   );
 }

@@ -26,15 +26,23 @@ import { database } from "../firebase";
 
 const DB_ATTENDANCE_RECORDS_KEY = "action";
 
+const GPS_STATUS = {
+  OFF: "off",
+  REQUESTING: "requesting",
+  ON: "on",
+  NOT_SUPPORTED: "not-supported",
+  DENIED: "denied",
+  ERROR: "error",
+};
+
 function WorkerScreen({ userData }) {
   const [checkedIn, setCheckedIn] = useState(null);
   const [recordId, setRecordId] = useState(null);
-  const [gpsStatus, setGpsStatus] = useState("off");
-  const [siteName, setSiteName] = useState(null);
+  const [gpsStatus, setGpsStatus] = useState(GPS_STATUS.OFF);
+  const [site, setSite] = useState(null);
 
   useEffect(() => {
     const todaySGT = extractDaySGT(new Date());
-
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const q = query(
       recordsRef,
@@ -47,6 +55,7 @@ function WorkerScreen({ userData }) {
       (snapshot) => {
         let checkedIn = false;
         let recordId = null;
+        let site = null;
 
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
@@ -54,12 +63,14 @@ function WorkerScreen({ userData }) {
             if (!record.checkOutDateTime) {
               checkedIn = true;
               recordId = childSnapshot.key;
+              site = record.worksite;
             }
           });
         }
 
         setCheckedIn(checkedIn);
         setRecordId(recordId);
+        setSite(site);
       },
       {
         onlyOnce: false,
@@ -91,7 +102,6 @@ function WorkerScreen({ userData }) {
   const writeCheckIn = (site) => {
     const todaySGT = extractDaySGT(new Date());
     const checkInKey = `${userData.userID}_${todaySGT}`;
-
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const newRecordRef = push(recordsRef);
 
@@ -113,33 +123,33 @@ function WorkerScreen({ userData }) {
       console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
         writeCheckIn(site);
-        setGpsStatus("on-site");
-        setSiteName(site.name);
+        setSite(site.name);
         return;
       }
     }
-    setGpsStatus("on-elsewhere");
-    setSiteName(null);
+    setSite(null);
   };
 
   const handleCheckIn = () => {
     if (!("geolocation" in navigator)) {
-      setGpsStatus("error-not-supported");
+      setGpsStatus(GPS_STATUS.NOT_SUPPORTED);
       return;
     }
+
+    setGpsStatus(GPS_STATUS.REQUESTING);
 
     navigator.permissions
       .query({ name: "geolocation" })
       .then(function (result) {
         if (result.state === "denied") {
           console.error("User must manually grant permissions.");
-          setGpsStatus("error-denied");
+          setGpsStatus(GPS_STATUS.DENIED);
           return;
         }
 
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setGpsStatus("detecting");
+            setGpsStatus(GPS_STATUS.ON);
             const { latitude, longitude } = position.coords;
             console.log(`Location at lat: ${latitude}, lng: ${longitude}.`);
             checkSite(latitude, longitude);
@@ -147,9 +157,9 @@ function WorkerScreen({ userData }) {
           (error) => {
             console.error(error);
             if (error.code === 1) {
-              setGpsStatus("error-denied");
+              setGpsStatus(GPS_STATUS.DENIED);
             } else {
-              setGpsStatus("error");
+              setGpsStatus(GPS_STATUS.ERROR);
             }
           },
           { enableHighAccuracy: true }
@@ -171,16 +181,27 @@ function WorkerScreen({ userData }) {
     // ...other check-ins
   ];
 
-  const statusMessages = {
-    detecting: "Detecting your location. Please wait.",
-    "on-site": `Checked in at ${siteName}.`,
-    "on-elsewhere":
-      "You're not at any work site. If you're at a work site, please contact support.",
-    "error-denied":
-      "Please allow access to GPS so we can tell whether you're at a work site.",
-    error: "GPS error. Please contact support.",
-    "error-not-supported":
-      "GPS not supported. Please use a compatible browser.",
+  const gpsStatusMsg = () => {
+    switch (gpsStatus) {
+      case GPS_STATUS.OFF:
+        return "No access to GPS.";
+      case GPS_STATUS.REQUESTING:
+        return "Requesting access to GPS.";
+      case GPS_STATUS.ON:
+        if (site) {
+          return `GPS on. You're at ${site}.`;
+        } else {
+          return "GPS on. You're not at any work site.";
+        }
+      case GPS_STATUS.NOT_SUPPORTED:
+        return "GPS not supported. Please use a compatible browser.";
+      case GPS_STATUS.DENIED:
+        return "GPS access denied. Please grant access to confirm you're at a work site.";
+      case GPS_STATUS.ERROR:
+        return "GPS error. Please contact support.";
+      default:
+        return;
+    }
   };
 
   return (
@@ -229,9 +250,7 @@ function WorkerScreen({ userData }) {
           Check Out
         </Button>
       )}
-      {gpsStatus !== "off" && (
-        <Typography>{statusMessages[gpsStatus]}</Typography>
-      )}
+      <Typography>{gpsStatusMsg()}</Typography>
       <Table>
         <TableHead>
           <TableRow>

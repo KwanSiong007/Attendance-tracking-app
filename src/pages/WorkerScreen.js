@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Button,
@@ -32,37 +32,45 @@ function WorkerScreen({ userData }) {
   const [gpsStatus, setGpsStatus] = useState("off");
   const [siteName, setSiteName] = useState(null);
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      const todaySGT = extractDaySGT(new Date());
+  const fetchAttendance = useCallback(async () => {
+    const todaySGT = extractDaySGT(new Date());
 
-      const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
-      const q = query(
-        recordsRef,
-        orderByChild("checkInKey"),
-        equalTo(`${userData.userID}_${todaySGT}`)
-      );
+    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const q = query(
+      recordsRef,
+      orderByChild("checkInKey"),
+      equalTo(`${userData.userID}_${todaySGT}`)
+    );
 
-      try {
-        const snapshot = await get(q);
-        let currCheckedIn = false;
-        if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const record = childSnapshot.val();
-            if (!record.checkOutDateTime) {
-              currCheckedIn = true;
-              setRecordId(childSnapshot.key);
-            }
-          });
-        }
-        setCheckedIn(currCheckedIn);
-      } catch (error) {
-        console.error("Error fetching records: ", error);
+    try {
+      const snapshot = await get(q);
+      let checkedIn = false;
+      let recordId = null;
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const record = childSnapshot.val();
+          if (!record.checkOutDateTime) {
+            checkedIn = true;
+            recordId = childSnapshot.key;
+          }
+        });
       }
+      return { recordId: recordId, checkedIn: checkedIn };
+    } catch (error) {
+      console.error("Error fetching records: ", error);
+      return { recordId: null, checkedIn: null };
+    }
+  }, [userData.userID]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { recordId, checkedIn } = await fetchAttendance();
+      setRecordId(recordId);
+      setCheckedIn(checkedIn);
     };
 
-    fetchRecords();
-  }, [userData.userID]);
+    fetchData();
+  }, [fetchAttendance]);
 
   const sites = [
     {
@@ -168,7 +176,7 @@ function WorkerScreen({ userData }) {
 
   const statusMessages = {
     detecting: "Detecting your location. Please wait.",
-    "on-site": `Checked in/out at ${siteName}.`,
+    "on-site": `Checked in at ${siteName}.`,
     "on-elsewhere":
       "You're not at any work site. If you're at a work site, please contact support.",
     "error-denied":

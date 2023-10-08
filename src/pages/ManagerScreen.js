@@ -3,6 +3,7 @@ import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
 import {
   Box,
+  CircularProgress,
   Container,
   IconButton,
   InputAdornment,
@@ -94,30 +95,34 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && profiles && (
-          <TextField
-            id="outlined-basic"
-            variant="outlined"
-            label="Search by Name"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            sx={{ alignSelf: "flex-start" }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton>
-                    <SearchIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+        {attendance && profiles ? (
+          <>
+            <TextField
+              id="outlined-basic"
+              variant="outlined"
+              label="Search by Name"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{ alignSelf: "flex-start" }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <ManagerAttendance
+              attendance={filteredAttendance}
+              profiles={profiles}
+              nowLoaded={nowLoaded}
+            />
+          </>
+        ) : (
+          <CircularProgress />
         )}
-        <ManagerAttendance
-          attendance={filteredAttendance}
-          profiles={profiles}
-          nowLoaded={nowLoaded}
-        />
       </Box>
     </Container>
   );

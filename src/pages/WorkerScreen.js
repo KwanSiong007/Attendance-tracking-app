@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, CircularProgress, Container, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
 import {
@@ -249,16 +249,24 @@ function WorkerScreen({ workerId }) {
           mb: 2,
         }}
       >
-        <Typography>{attendanceMsg()}</Typography>
-        {checkedIn === false && <CheckInButton handleCheckIn={handleCheckIn} />}
-        {checkedIn === true && (
-          <CheckOutButton handleCheckOut={handleCheckOut} />
+        {checkedIn !== null ? (
+          <>
+            <Typography>{attendanceMsg()}</Typography>
+            {checkedIn === false && (
+              <CheckInButton handleCheckIn={handleCheckIn} />
+            )}
+            {checkedIn === true && (
+              <CheckOutButton handleCheckOut={handleCheckOut} />
+            )}
+            <Typography>{gpsStatusMsg()}</Typography>
+            <Typography sx={{ alignSelf: "flex-start" }}>
+              Showing your check ins today ({currDate}):
+            </Typography>
+            <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
+          </>
+        ) : (
+          <CircularProgress />
         )}
-        <Typography>{gpsStatusMsg()}</Typography>
-        <Typography sx={{ alignSelf: "flex-start" }}>
-          Showing your check ins today ({currDate}):
-        </Typography>
-        <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
       </Box>
     </Container>
   );

@@ -44,10 +44,6 @@ function ManagerAttendance({ attendance, profiles, nowLoaded }) {
     setPage(0);
   };
 
-  if (!attendance || !profiles) {
-    return;
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <TableContainer component={Paper} sx={{ overflowX: "auto" }}>

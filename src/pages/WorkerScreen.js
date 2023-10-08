@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { buildKey } from "../utils";
+import { showCurrDate, buildKey } from "../utils";
 import {
   push,
   ref,
@@ -28,6 +28,8 @@ const GPS_STATUS = {
 };
 
 function WorkerScreen({ userData }) {
+  const [currDate, setCurrDate] = useState([]);
+
   const [attendance, setAttendance] = useState([]);
   const [checkedIn, setCheckedIn] = useState(null);
   const [checkedInSite, setCheckedInSite] = useState(null);
@@ -38,6 +40,7 @@ function WorkerScreen({ userData }) {
 
   useEffect(() => {
     const searchKey = buildKey(userData.userID, new Date());
+    setCurrDate(showCurrDate(new Date()));
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
@@ -161,6 +164,7 @@ function WorkerScreen({ userData }) {
     setCheckedIn(true);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
+      userID: userData.userID,
       checkInDateTime: new Date().toISOString(),
       checkInKey: searchKey,
       username: userData.username,
@@ -231,55 +235,64 @@ function WorkerScreen({ userData }) {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-        mb: 2,
-      }}
-    >
-      <Typography>{attendanceMsg()}</Typography>
-      {checkedIn === false && (
-        <Button
-          onClick={handleCheckIn}
-          variant="contained"
-          sx={{
-            borderRadius: "50%",
-            width: "110px",
-            height: "110px",
-            textTransform: "none",
-            backgroundColor: "darkgreen",
-            "&:hover": {
-              backgroundColor: "green",
-            },
-          }}
-        >
-          Check In
-        </Button>
-      )}
-      {checkedIn === true && (
-        <Button
-          onClick={handleCheckOut}
-          variant="contained"
-          sx={{
-            borderRadius: "50%",
-            width: "110px",
-            height: "110px",
-            textTransform: "none",
-            backgroundColor: "darkred",
-            "&:hover": {
-              backgroundColor: "red",
-            },
-          }}
-        >
-          Check Out
-        </Button>
-      )}
-      <Typography>{gpsStatusMsg()}</Typography>
-      <WorkerAttendance attendance={attendance} />
-    </Box>
+    <Container component="main" maxWidth="md">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        <Typography>{attendanceMsg()}</Typography>
+        {checkedIn === false && (
+          <Button
+            onClick={handleCheckIn}
+            variant="contained"
+            sx={{
+              borderRadius: "50%",
+              width: "160px",
+              height: "160px",
+              fontSize: "h5.fontSize",
+              lineHeight: "1.2",
+              textTransform: "none",
+              backgroundColor: "darkgreen",
+              "&:hover": {
+                backgroundColor: "green",
+              },
+            }}
+          >
+            Check In
+          </Button>
+        )}
+        {checkedIn === true && (
+          <Button
+            onClick={handleCheckOut}
+            variant="contained"
+            sx={{
+              borderRadius: "50%",
+              width: "160px",
+              height: "160px",
+              fontSize: "h5.fontSize",
+              lineHeight: "1.2",
+              textTransform: "none",
+              backgroundColor: "darkred",
+              "&:hover": {
+                backgroundColor: "red",
+              },
+            }}
+          >
+            Check Out
+          </Button>
+        )}
+        <Typography>{gpsStatusMsg()}</Typography>
+        <Box sx={{ alignSelf: "flex-start" }}>
+          <Typography>Showing your check ins today ({currDate}):</Typography>
+        </Box>
+        <WorkerAttendance attendance={attendance} />
+      </Box>
+    </Container>
   );
 }
 

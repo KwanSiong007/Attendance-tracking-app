@@ -19,13 +19,17 @@ const showDate = (isoString) => {
   return format(parseISO(isoString), "EEE, d MMM");
 };
 
+const showCurrDate = (dateObj) => {
+  return format(utcToZonedTime(dateObj, "Asia/Singapore"), "EEE, d MMM");
+};
+
 const showTime = (isoString) => {
-  return isoString ? format(parseISO(isoString), "h:mm aa") : "";
+  return isoString ? format(parseISO(isoString), "h:mm aa") : "—";
 };
 
 const showTimeDiff = (isoStart, isoEnd) => {
   if (!isoEnd) {
-    return "";
+    return "—";
   }
 
   const start = parseISO(isoStart);
@@ -57,4 +61,11 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export { buildKey, showDate, showTime, showTimeDiff, VisuallyHiddenInput };
+export {
+  buildKey,
+  showDate,
+  showCurrDate,
+  showTime,
+  showTimeDiff,
+  VisuallyHiddenInput,
+};

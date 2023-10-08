@@ -58,7 +58,7 @@ function ManagerAttendance({ attendance }) {
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((row, index) => (
               <TableRow
-                key={row.checkInKey}
+                key={`${row.userID}_${row.checkInDateTime}`}
                 sx={{
                   backgroundColor:
                     index % 2 === 1 ? "action.hover" : "transparent",

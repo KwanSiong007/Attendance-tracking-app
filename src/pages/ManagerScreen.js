@@ -16,7 +16,7 @@ import DB_KEYS from "../constants/dbKeys";
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [attendance, setAttendance] = useState([]);
-  const [profiles, setProfiles] = useState({});
+  const [profiles, setProfiles] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
@@ -77,8 +77,8 @@ function ManagerScreen() {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    const filteredRecords = attendance.filter((record) =>
-      record.name.toLowerCase().includes(query.toLowerCase())
+    const filteredRecords = attendance.filter((row) =>
+      profiles[row.userId].name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredAttendance(filteredRecords);
   };
@@ -94,23 +94,25 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        <TextField
-          id="outlined-basic"
-          variant="outlined"
-          label="Search by Name"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          sx={{ alignSelf: "flex-start" }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton>
-                  <SearchIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+        {attendance && profiles && (
+          <TextField
+            id="outlined-basic"
+            variant="outlined"
+            label="Search by Name"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            sx={{ alignSelf: "flex-start" }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton>
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
         <ManagerAttendance
           attendance={filteredAttendance}
           profiles={profiles}

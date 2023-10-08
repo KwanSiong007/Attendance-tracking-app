@@ -31,7 +31,7 @@ const GPS_STATUS = {
 
 function WorkerScreen({ workerId }) {
   const [nowLoaded, setNowLoaded] = useState(null);
-  const [currDate, setCurrDate] = useState([]);
+  const [currDate, setCurrDate] = useState("");
 
   const [attendance, setAttendance] = useState([]);
   const [checkedIn, setCheckedIn] = useState(null);

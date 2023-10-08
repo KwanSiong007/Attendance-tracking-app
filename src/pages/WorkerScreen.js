@@ -290,9 +290,9 @@ function WorkerScreen({ userData }) {
           </Button>
         )}
         <Typography>{gpsStatusMsg()}</Typography>
-        <Box sx={{ alignSelf: "flex-start" }}>
-          <Typography>Showing your check ins today ({currDate}):</Typography>
-        </Box>
+        <Typography sx={{ alignSelf: "flex-start" }}>
+          Showing your check ins today ({currDate}):
+        </Typography>
         <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
       </Box>
     </Container>

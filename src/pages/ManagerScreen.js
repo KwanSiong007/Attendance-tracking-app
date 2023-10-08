@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
 import ManagerAttendance from "../components/ManagerAttendance";
-import { TextField, InputAdornment, IconButton } from "@mui/material";
+import {
+  Box,
+  Container,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 const DB_ATTENDANCE_RECORDS_KEY = "action";
@@ -55,14 +61,23 @@ function ManagerScreen() {
   };
 
   return (
-    <>
-      <div id="search">
+    <Container component="main" maxWidth="md">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <TextField
           id="outlined-basic"
           variant="outlined"
-          label="Search"
+          label="Search by Name"
           value={searchQuery}
           onChange={handleSearchChange}
+          sx={{ alignSelf: "flex-start" }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -73,12 +88,12 @@ function ManagerScreen() {
             ),
           }}
         />
-      </div>
-      <ManagerAttendance
-        attendance={filteredAttendance}
-        nowLoaded={nowLoaded}
-      />
-    </>
+        <ManagerAttendance
+          attendance={filteredAttendance}
+          nowLoaded={nowLoaded}
+        />
+      </Box>
+    </Container>
   );
 }
 

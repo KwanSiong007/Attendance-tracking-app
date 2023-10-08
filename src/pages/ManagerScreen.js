@@ -6,9 +6,14 @@ import ManagerAttendance from "../components/ManagerAttendance";
 const DB_ATTENDANCE_RECORDS_KEY = "action";
 
 function ManagerScreen() {
+  const [nowLoaded, setNowLoaded] = useState(null);
+
   const [attendance, setAttendance] = useState([]);
 
   useEffect(() => {
+    const nowLoaded = new Date();
+    setNowLoaded(nowLoaded);
+
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
 
     const unsubscribe = onValue(
@@ -36,7 +41,7 @@ function ManagerScreen() {
     return () => unsubscribe();
   }, []);
 
-  return <ManagerAttendance attendance={attendance} />;
+  return <ManagerAttendance attendance={attendance} nowLoaded={nowLoaded} />;
 }
 
 export default ManagerScreen;

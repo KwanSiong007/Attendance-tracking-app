@@ -7,12 +7,12 @@ import {
 import { utcToZonedTime } from "date-fns-tz";
 import { styled } from "@mui/material/styles";
 
+const extractDate = (dateObj) => {
+  return format(utcToZonedTime(dateObj, "Asia/Singapore"), "yyyy-MM-dd");
+};
+
 const buildKey = (userID, dateObj) => {
-  const dateStr = format(
-    utcToZonedTime(dateObj, "Asia/Singapore"),
-    "yyyy-MM-dd"
-  );
-  return `${userID}_${dateStr}`;
+  return `${userID}_${extractDate(dateObj)}`;
 };
 
 const showDate = (isoString) => {
@@ -23,29 +23,41 @@ const showCurrDate = (dateObj) => {
   return format(utcToZonedTime(dateObj, "Asia/Singapore"), "EEE, d MMM");
 };
 
-const showTime = (isoString) => {
-  return isoString ? format(parseISO(isoString), "h:mm aa") : "—";
+const showCheckInTime = (isoString) => {
+  return format(parseISO(isoString), "h:mm aa");
 };
 
-const showTimeDiff = (isoStart, isoEnd) => {
-  if (!isoEnd) {
-    return "—";
-  }
-
-  const start = parseISO(isoStart);
-  const end = parseISO(isoEnd);
-  const hoursDiff = differenceInHours(end, start);
-  const minsDiff = differenceInMinutes(end, start) % 60;
-
-  const hoursStr = `${hoursDiff} hour${hoursDiff === 1 ? "" : "s"}`;
-  const minsStr = `${minsDiff} min${minsDiff === 1 ? "" : "s"}`;
-
-  if (hoursDiff === 0) {
-    return minsStr;
-  } else if (minsDiff === 0) {
-    return hoursStr;
+const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
+  if (checkOutIso) {
+    return format(parseISO(checkOutIso), "h:mm aa");
+  } else if (extractDate(parseISO(checkInIso)) === extractDate(nowLoaded)) {
+    return "Pending";
   } else {
-    return hoursStr + " " + minsStr;
+    return "Nil";
+  }
+};
+
+const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
+  if (checkOutIso) {
+    const start = parseISO(checkInIso);
+    const end = parseISO(checkOutIso);
+    const hoursDiff = differenceInHours(end, start);
+    const minsDiff = differenceInMinutes(end, start) % 60;
+
+    const hoursStr = `${hoursDiff} hour${hoursDiff === 1 ? "" : "s"}`;
+    const minsStr = `${minsDiff} min${minsDiff === 1 ? "" : "s"}`;
+
+    if (hoursDiff === 0) {
+      return minsStr;
+    } else if (minsDiff === 0) {
+      return hoursStr;
+    } else {
+      return hoursStr + " " + minsStr;
+    }
+  } else if (extractDate(parseISO(checkInIso)) === extractDate(nowLoaded)) {
+    return "Pending";
+  } else {
+    return "Nil";
   }
 };
 
@@ -65,7 +77,8 @@ export {
   buildKey,
   showDate,
   showCurrDate,
-  showTime,
+  showCheckInTime,
+  showCheckOutTime,
   showTimeDiff,
   VisuallyHiddenInput,
 };

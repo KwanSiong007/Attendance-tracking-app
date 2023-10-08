@@ -28,6 +28,7 @@ const GPS_STATUS = {
 };
 
 function WorkerScreen({ userData }) {
+  const [nowLoaded, setNowLoaded] = useState(null);
   const [currDate, setCurrDate] = useState([]);
 
   const [attendance, setAttendance] = useState([]);
@@ -39,8 +40,10 @@ function WorkerScreen({ userData }) {
   const [gpsSite, setGpsSite] = useState(null);
 
   useEffect(() => {
-    const searchKey = buildKey(userData.userID, new Date());
-    setCurrDate(showCurrDate(new Date()));
+    const nowLoaded = new Date();
+    setNowLoaded(nowLoaded);
+    const searchKey = buildKey(userData.userID, nowLoaded);
+    setCurrDate(showCurrDate(nowLoaded));
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
@@ -290,7 +293,7 @@ function WorkerScreen({ userData }) {
         <Box sx={{ alignSelf: "flex-start" }}>
           <Typography>Showing your check ins today ({currDate}):</Typography>
         </Box>
-        <WorkerAttendance attendance={attendance} />
+        <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
       </Box>
     </Container>
   );

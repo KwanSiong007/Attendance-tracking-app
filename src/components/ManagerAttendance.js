@@ -9,7 +9,12 @@ import {
   TableFooter,
   TablePagination,
 } from "@mui/material";
-import { showDate, showTime, showTimeDiff } from "../utils";
+import {
+  showDate,
+  showCheckInTime,
+  showCheckOutTime,
+  showTimeDiff,
+} from "../utils";
 
 const theme = createTheme({
   components: {
@@ -21,7 +26,7 @@ const theme = createTheme({
   },
 });
 
-function ManagerAttendance({ attendance }) {
+function ManagerAttendance({ attendance, nowLoaded }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -67,10 +72,20 @@ function ManagerAttendance({ attendance }) {
                 <TableCell>{showDate(row.checkInDateTime)}</TableCell>
                 <TableCell>{row.username}</TableCell>
                 <TableCell>{row.worksite}</TableCell>
-                <TableCell>{showTime(row.checkInDateTime)}</TableCell>
-                <TableCell>{showTime(row.checkOutDateTime)}</TableCell>
+                <TableCell>{showCheckInTime(row.checkInDateTime)}</TableCell>
                 <TableCell>
-                  {showTimeDiff(row.checkInDateTime, row.checkOutDateTime)}
+                  {showCheckOutTime(
+                    row.checkInDateTime,
+                    row.checkOutDateTime,
+                    nowLoaded
+                  )}
+                </TableCell>
+                <TableCell>
+                  {showTimeDiff(
+                    row.checkInDateTime,
+                    row.checkOutDateTime,
+                    nowLoaded
+                  )}
                 </TableCell>
               </TableRow>
             ))}

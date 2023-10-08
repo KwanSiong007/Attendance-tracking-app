@@ -92,7 +92,7 @@ function Register() {
       setState({
         email: "",
         password: "",
-        username: "",
+        name: "",
         photo: null,
         confirmPassword: "",
       });

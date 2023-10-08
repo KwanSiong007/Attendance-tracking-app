@@ -17,3 +17,9 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+#search {
+  display: flex;
+  justify-content: flex-start;
+  width: 200px;
+}

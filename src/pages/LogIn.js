@@ -144,9 +144,7 @@ function LogIn() {
       <div>
         <h1>Welcome, {user.displayName}!</h1>
         {role === ROLES.MANAGER && <ManagerScreen />}
-        {role === ROLES.WORKER && (
-          <WorkerScreen workerId={user.userId} workerName={user.username} />
-        )}
+        {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
         <div>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>

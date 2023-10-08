@@ -27,7 +27,7 @@ const GPS_STATUS = {
   ERROR: "error",
 };
 
-function WorkerScreen({ workerId, workerName }) {
+function WorkerScreen({ workerId }) {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [currDate, setCurrDate] = useState([]);
 

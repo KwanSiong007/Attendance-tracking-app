@@ -32,11 +32,19 @@ function Register() {
     password: "",
     photo: null,
     photoPreviewURL: null,
+    confirmPassword: "",
   });
   const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
 
   const registerUser = async () => {
     try {
+      // Check if password and confirm password match
+      if (state.password !== state.confirmPassword) {
+        setConfirmPasswordError(true);
+        return; // Don't proceed with registration
+      }
+
       const user = await register(state.email, state.password);
 
       let photoURL = null;
@@ -58,6 +66,7 @@ function Register() {
         username: state.username,
         email: state.email,
         profilePictureUrl: photoURL,
+        userID: user.uid,
       };
 
       console.log("profileData:", profileData);
@@ -70,6 +79,7 @@ function Register() {
         password: "",
         username: "",
         photo: null,
+        confirmPassword: "",
       });
       console.log("User registered:", user);
     } catch (error) {
@@ -92,6 +102,10 @@ function Register() {
       setPasswordError(true);
     } else {
       setPasswordError(false);
+    }
+
+    if (name === "confirmPassword") {
+      setConfirmPasswordError(false);
     }
   };
 
@@ -195,6 +209,18 @@ function Register() {
               passwordError ? "Password must be at least 8 characters" : ""
             }
             value={state.password}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            onChange={(e) => handleChange(e)}
+            error={confirmPasswordError}
+            helperText={confirmPasswordError ? "Passwords do not match" : ""}
+            value={state.confirmPassword}
           />
           <Button
             type="submit"

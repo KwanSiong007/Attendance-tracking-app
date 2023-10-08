@@ -164,6 +164,7 @@ function WorkerScreen({ userData }) {
     setCheckedIn(true);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
+      userID: userData.userID,
       checkInDateTime: new Date().toISOString(),
       checkInKey: searchKey,
       username: userData.username,

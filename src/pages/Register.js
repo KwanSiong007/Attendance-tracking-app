@@ -20,9 +20,11 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { VisuallyHiddenInput } from "../utils";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { VisuallyHiddenInput } from "../utils";
+import ROLES from "../constants/roles";
 
 const DB_PROFILE_KEY = "profiles";
 const STORAGE_PROFILE_KEY = "profiles/";
@@ -81,6 +83,7 @@ function Register() {
         email: state.email,
         photoUrl: photoUrl,
         userId: user.uid,
+        role: ROLES.WORKER,
       };
       // console.log("profile:", profile);
       const profileRef = ref(database, DB_PROFILE_KEY);

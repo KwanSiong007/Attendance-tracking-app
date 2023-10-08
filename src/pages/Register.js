@@ -24,8 +24,8 @@ import { VisuallyHiddenInput } from "../utils";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const DB_PROFILE_KEY = "profile-data";
-const STORAGE_PROFILE_KEY = "profile-data/";
+const DB_PROFILE_KEY = "profiles";
+const STORAGE_PROFILE_KEY = "profiles/";
 
 function Register() {
   const [state, setState] = useState({
@@ -33,7 +33,7 @@ function Register() {
     email: "",
     password: "",
     photo: null,
-    photoPreviewURL: null,
+    photoPreviewUrl: null,
     confirmPassword: "",
   });
   const [passwordError, setPasswordError] = useState(false);
@@ -61,31 +61,31 @@ function Register() {
 
       const user = await register(state.email, state.password);
 
-      let photoURL = null;
+      let photoUrl = null;
       if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
           STORAGE_PROFILE_KEY + state.photo.name
         );
         await uploadBytes(fullStorageRef, state.photo);
-        photoURL = await getDownloadURL(fullStorageRef, state.photo.name);
+        photoUrl = await getDownloadURL(fullStorageRef, state.photo.name);
       }
 
       await updateProfile(user, {
         displayName: state.username,
-        photoURL,
+        photoURL: photoUrl,
       });
 
-      const profileData = {
+      const profile = {
         username: state.username,
         email: state.email,
-        profilePictureUrl: photoURL,
-        userID: user.uid,
+        photoUrl: photoUrl,
+        userId: user.uid,
       };
-      console.log("profileData:", profileData);
+      // console.log("profile:", profile);
       const profileRef = ref(database, DB_PROFILE_KEY);
       const newProfileRef = push(profileRef);
-      set(newProfileRef, profileData);
+      set(newProfileRef, profile);
 
       showSuccessMessage();
       setState({
@@ -95,7 +95,7 @@ function Register() {
         photo: null,
         confirmPassword: "",
       });
-      console.log("User registered:", user);
+      // console.log("User registered:", user);
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -126,12 +126,12 @@ function Register() {
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; // Get the first selected file
     if (file) {
-      const previewURL = URL.createObjectURL(file);
+      const previewUrl = URL.createObjectURL(file);
 
       setState({
         ...state,
         photo: file,
-        photoPreviewURL: previewURL,
+        photoPreviewUrl: previewUrl,
       });
     }
   };
@@ -182,7 +182,7 @@ function Register() {
             Profile Photo
           </InputLabel>
           {state.photo && (
-            <Image src={state.photoPreviewURL} width="200px" height="200px" />
+            <Image src={state.photoPreviewUrl} width="200px" height="200px" />
           )}
           <Button
             component="label"

@@ -11,11 +11,14 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const DB_ATTENDANCE_RECORDS_KEY = "action";
+const DB_ATTENDANCE_KEY = "checkIns";
+const DB_PROFILE_KEY = "profiles";
 
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [attendance, setAttendance] = useState([]);
+  const [photos, setPhotos] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
@@ -23,10 +26,11 @@ function ManagerScreen() {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
 
-    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const attendanceRef = ref(database, DB_ATTENDANCE_KEY);
+    const profilesRef = ref(database, DB_PROFILE_KEY);
 
-    const unsubscribe = onValue(
-      recordsRef,
+    const unsubscribeAttendance = onValue(
+      attendanceRef,
       (snapshot) => {
         let attendance = [];
 
@@ -43,12 +47,32 @@ function ManagerScreen() {
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
       },
-      {
-        onlyOnce: false,
-      }
+      { onlyOnce: false }
     );
 
-    return () => unsubscribe();
+    const unsubscribeProfiles = onValue(
+      profilesRef,
+      (snapshot) => {
+        let photos = {};
+
+        snapshot.forEach((childSnapshot) => {
+          const row = childSnapshot.val();
+          if (row.photoUrl) {
+            photos[row.userId] = row.photoUrl;
+          }
+        });
+
+        console.log(photos);
+
+        setPhotos(photos);
+      },
+      { onlyOnce: false }
+    );
+
+    return () => {
+      unsubscribeAttendance();
+      unsubscribeProfiles();
+    };
   }, []);
 
   const handleSearchChange = (e) => {

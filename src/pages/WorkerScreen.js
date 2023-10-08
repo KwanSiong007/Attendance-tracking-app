@@ -42,7 +42,7 @@ function WorkerScreen({ userData }) {
   useEffect(() => {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
-    const searchKey = buildKey(userData.userID, nowLoaded);
+    const searchKey = buildKey(userData.userId, nowLoaded);
     setCurrDate(showCurrDate(nowLoaded));
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
@@ -86,7 +86,7 @@ function WorkerScreen({ userData }) {
     );
 
     return () => unsubscribe();
-  }, [userData.userID]);
+  }, [userData.userId]);
 
   const sites = [
     {
@@ -112,7 +112,7 @@ function WorkerScreen({ userData }) {
     for (let site of sites) {
       const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
       const distance = findDistance(userPoint, sitePoint);
-      console.log(`Distance of ${distance} km from ${site.name}.`);
+      // console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
         setGpsSite(site.name);
         return site;
@@ -167,7 +167,7 @@ function WorkerScreen({ userData }) {
     setCheckedIn(true);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
-      userID: userData.userID,
+      userId: userData.userId,
       checkInDateTime: new Date().toISOString(),
       checkInKey: searchKey,
       username: userData.username,

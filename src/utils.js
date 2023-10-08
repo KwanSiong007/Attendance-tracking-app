@@ -11,8 +11,8 @@ const extractDate = (dateObj) => {
   return format(utcToZonedTime(dateObj, "Asia/Singapore"), "yyyy-MM-dd");
 };
 
-const buildKey = (userID, dateObj) => {
-  return `${userID}_${extractDate(dateObj)}`;
+const buildKey = (userId, dateObj) => {
+  return `${userId}_${extractDate(dateObj)}`;
 };
 
 const showDate = (isoString) => {

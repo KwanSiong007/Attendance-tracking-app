@@ -46,7 +46,7 @@ function WorkerAttendance({ attendance, nowLoaded }) {
           .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
           .map((row, index) => (
             <TableRow
-              key={`${row.userID}_${row.checkInDateTime}`}
+              key={`${row.userId}_${row.checkInDateTime}`}
               sx={{
                 backgroundColor:
                   index % 2 === 1 ? "action.hover" : "transparent",

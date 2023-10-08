@@ -14,7 +14,7 @@ import ManagerScreen from "./ManagerScreen";
 import { push, ref, set } from "firebase/database";
 import { database } from "../firebase";
 
-const DB_LOGGED_IN_USER_KEY = "logged_in_user";
+const DB_LOGGED_IN_USER_KEY = "logIns";
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,7 +40,7 @@ function LogIn() {
         setLoading(false);
         // User is signed in, see docs for a list of available properties
         setUser(user);
-        console.log("user", user);
+        // console.log("user", user);
       }
       //If there's no user, it means the user is not logged in or signed out, so it does the following:
       //Sets the loading state to false, indicating that the loading process is complete.
@@ -102,14 +102,12 @@ function LogIn() {
   // if the user is already signed in, display the below page
   if (isLoggedIn) {
     const loggedInUserData = {
-      username: user.displayName,
-      email: user.email,
-      userID: user.uid,
+      userId: user.uid,
     };
     const loggedInRef = ref(database, DB_LOGGED_IN_USER_KEY);
     const newLoggedInRef = push(loggedInRef);
     set(newLoggedInRef, loggedInUserData);
-    console.log("loggedInUserData", loggedInUserData);
+    // console.log("loggedInUserData", loggedInUserData);
 
     const checkManagerRole = () => {
       if (user.uid === "0HLQ3NGKpCZt0LNlT0vET0so7Ip1") {

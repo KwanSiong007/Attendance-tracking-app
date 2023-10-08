@@ -63,7 +63,6 @@ function ManagerScreen() {
         });
 
         console.log(photos);
-
         setPhotos(photos);
       },
       { onlyOnce: false }

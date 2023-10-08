@@ -14,7 +14,7 @@ import ManagerScreen from "./ManagerScreen";
 import { push, ref, set } from "firebase/database";
 import { database } from "../firebase";
 
-const DB_LOGGED_IN_USER_KEY = "logIns";
+const DB_LOG_INS_KEY = "logIns";
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -61,6 +61,15 @@ function LogIn() {
   const signInUser = async () => {
     const user = await signIn(state.email, state.password);
     if (user) {
+      const logIn = {
+        userId: user.uid,
+        logInDateTime: new Date().toISOString(),
+      };
+      const logInsRef = ref(database, DB_LOG_INS_KEY);
+      const newLogInRef = push(logInsRef);
+      set(newLogInRef, logIn);
+      // console.log("logIn", logIn);
+
       setIsLoggedIn(true);
       setState({
         email: "",
@@ -101,14 +110,6 @@ function LogIn() {
 
   // if the user is already signed in, display the below page
   if (isLoggedIn) {
-    const loggedInUserData = {
-      userId: user.uid,
-    };
-    const loggedInRef = ref(database, DB_LOGGED_IN_USER_KEY);
-    const newLoggedInRef = push(loggedInRef);
-    set(newLoggedInRef, loggedInUserData);
-    // console.log("loggedInUserData", loggedInUserData);
-
     const checkManagerRole = () => {
       if (user.uid === "0HLQ3NGKpCZt0LNlT0vET0so7Ip1") {
         return true;
@@ -125,7 +126,7 @@ function LogIn() {
         {isManager ? (
           <ManagerScreen />
         ) : (
-          <WorkerScreen userData={loggedInUserData} />
+          <WorkerScreen workerId={user.userId} workerName={user.username} />
         )}
         <div>
           <button onClick={handleSignOut}>Sign Out</button>

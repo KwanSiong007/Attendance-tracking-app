@@ -27,7 +27,7 @@ const GPS_STATUS = {
   ERROR: "error",
 };
 
-function WorkerScreen({ userData }) {
+function WorkerScreen({ workerId, workerName }) {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [currDate, setCurrDate] = useState([]);
 
@@ -42,7 +42,7 @@ function WorkerScreen({ userData }) {
   useEffect(() => {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
-    const searchKey = buildKey(userData.userId, nowLoaded);
+    const searchKey = buildKey(workerId, nowLoaded);
     setCurrDate(showCurrDate(nowLoaded));
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
@@ -86,7 +86,7 @@ function WorkerScreen({ userData }) {
     );
 
     return () => unsubscribe();
-  }, [userData.userId]);
+  }, [workerId]);
 
   const sites = [
     {
@@ -160,17 +160,16 @@ function WorkerScreen({ userData }) {
   };
 
   const writeCheckIn = (site) => {
-    const searchKey = buildKey(userData.userID, new Date());
+    const searchKey = buildKey(workerId, new Date());
     const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
     const newRecordRef = push(recordsRef);
 
     setCheckedIn(true);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
-      userId: userData.userId,
+      userId: workerId,
       checkInDateTime: new Date().toISOString(),
       checkInKey: searchKey,
-      username: userData.username,
       worksite: site.name,
     });
   };

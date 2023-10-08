@@ -251,8 +251,10 @@ function WorkerScreen({ userData }) {
             variant="contained"
             sx={{
               borderRadius: "50%",
-              width: "110px",
-              height: "110px",
+              width: "160px",
+              height: "160px",
+              fontSize: "h5.fontSize",
+              lineHeight: "1.2",
               textTransform: "none",
               backgroundColor: "darkgreen",
               "&:hover": {
@@ -269,8 +271,10 @@ function WorkerScreen({ userData }) {
             variant="contained"
             sx={{
               borderRadius: "50%",
-              width: "110px",
-              height: "110px",
+              width: "160px",
+              height: "160px",
+              fontSize: "h5.fontSize",
+              lineHeight: "1.2",
               textTransform: "none",
               backgroundColor: "darkred",
               "&:hover": {

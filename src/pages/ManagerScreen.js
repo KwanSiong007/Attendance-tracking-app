@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
-import ManagerAttendance from "../components/ManagerAttendance";
 import {
   Box,
   Container,
@@ -11,8 +10,8 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const DB_ATTENDANCE_KEY = "checkIns";
-const DB_PROFILE_KEY = "profiles";
+import ManagerAttendance from "../components/ManagerAttendance";
+import DB_KEYS from "../constants/dbKeys";
 
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
@@ -26,8 +25,8 @@ function ManagerScreen() {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
 
-    const attendanceRef = ref(database, DB_ATTENDANCE_KEY);
-    const profilesRef = ref(database, DB_PROFILE_KEY);
+    const attendanceRef = ref(database, DB_KEYS.CHECK_INS);
+    const profilesRef = ref(database, DB_KEYS.PROFILES);
 
     const unsubscribeAttendance = onValue(
       attendanceRef,

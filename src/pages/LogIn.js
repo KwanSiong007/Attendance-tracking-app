@@ -9,16 +9,26 @@ import {
   Typography,
 } from "@mui/material";
 import { signIn, reAuth, logOut } from "../api/authentication";
-import WorkerScreen from "./WorkerScreen";
-import ManagerScreen from "./ManagerScreen";
-import { push, ref, set } from "firebase/database";
+import {
+  push,
+  ref,
+  set,
+  query,
+  orderByChild,
+  equalTo,
+  get,
+} from "firebase/database";
 import { database } from "../firebase";
 
-const DB_LOG_INS_KEY = "logIns";
+import WorkerScreen from "./WorkerScreen";
+import ManagerScreen from "./ManagerScreen";
+import DB_KEYS from "../constants/dbKeys";
+import ROLES from "../constants/roles";
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({});
+  const [role, setRole] = useState("");
   //The loading state is used to indicate whether the authentication check is still in progress.
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
@@ -58,14 +68,33 @@ function LogIn() {
     reAuth(checkIfLoggedIn);
   }, []);
 
+  useEffect(() => {
+    const fetchRole = async () => {
+      console.log(user);
+      const profilesRef = ref(database, DB_KEYS.PROFILES);
+      const q = query(profilesRef, orderByChild("userId"), equalTo(user.uid));
+      const snapshot = await get(q);
+
+      snapshot.forEach((childSnapshot) => {
+        const profile = childSnapshot.val();
+        setRole(profile.role);
+      });
+    };
+
+    if (user.uid) {
+      fetchRole();
+    }
+  }, [user]);
+
   const signInUser = async () => {
     const user = await signIn(state.email, state.password);
+
     if (user) {
       const logIn = {
         userId: user.uid,
         logInDateTime: new Date().toISOString(),
       };
-      const logInsRef = ref(database, DB_LOG_INS_KEY);
+      const logInsRef = ref(database, DB_KEYS.LOG_INS);
       const newLogInRef = push(logInsRef);
       set(newLogInRef, logIn);
       // console.log("logIn", logIn);
@@ -94,6 +123,7 @@ function LogIn() {
     await logOut();
     setIsLoggedIn(false);
     setUser({});
+    setRole("");
   };
 
   // when first load the page, the logic in the useEffect above is executed
@@ -110,22 +140,11 @@ function LogIn() {
 
   // if the user is already signed in, display the below page
   if (isLoggedIn) {
-    const checkManagerRole = () => {
-      if (user.uid === "0HLQ3NGKpCZt0LNlT0vET0so7Ip1") {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    const isManager = checkManagerRole();
-
     return (
       <div>
         <h1>Welcome, {user.displayName}!</h1>
-        {isManager ? (
-          <ManagerScreen />
-        ) : (
+        {role === ROLES.MANAGER && <ManagerScreen />}
+        {role === ROLES.WORKER && (
           <WorkerScreen workerId={user.userId} workerName={user.username} />
         )}
         <div>

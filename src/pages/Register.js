@@ -24,10 +24,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { VisuallyHiddenInput } from "../utils";
+import DB_KEYS from "../constants/dbKeys";
 import ROLES from "../constants/roles";
-
-const DB_PROFILE_KEY = "profiles";
-const STORAGE_PROFILE_KEY = "profiles/";
 
 function Register() {
   const [state, setState] = useState({
@@ -67,7 +65,7 @@ function Register() {
       if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
-          STORAGE_PROFILE_KEY + state.photo.name
+          DB_KEYS.PROFILES + "/" + state.photo.name
         );
         await uploadBytes(fullStorageRef, state.photo);
         photoUrl = await getDownloadURL(fullStorageRef, state.photo.name);
@@ -86,7 +84,7 @@ function Register() {
         role: ROLES.WORKER,
       };
       // console.log("profile:", profile);
-      const profileRef = ref(database, DB_PROFILE_KEY);
+      const profileRef = ref(database, DB_KEYS.PROFILES);
       const newProfileRef = push(profileRef);
       set(newProfileRef, profile);
 

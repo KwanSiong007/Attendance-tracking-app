@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Container, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { showCurrDate, buildKey } from "../utils";
 import {
   push,
   ref,
@@ -14,9 +13,10 @@ import {
   update,
 } from "firebase/database";
 import { database } from "../firebase";
-import WorkerAttendance from "../components/WorkerAttendance";
 
-const DB_ATTENDANCE_RECORDS_KEY = "action";
+import WorkerAttendance from "../components/WorkerAttendance";
+import { showCurrDate, buildKey } from "../utils";
+import DB_KEYS from "../constants/dbKeys";
 
 const GPS_STATUS = {
   OFF: "off",
@@ -44,7 +44,7 @@ function WorkerScreen({ workerId, workerName }) {
     setNowLoaded(nowLoaded);
     const searchKey = buildKey(workerId, nowLoaded);
     setCurrDate(showCurrDate(nowLoaded));
-    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
     const unsubscribe = onValue(
@@ -161,7 +161,7 @@ function WorkerScreen({ workerId, workerName }) {
 
   const writeCheckIn = (site) => {
     const searchKey = buildKey(workerId, new Date());
-    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
     const newRecordRef = push(recordsRef);
 
     setCheckedIn(true);
@@ -186,7 +186,7 @@ function WorkerScreen({ workerId, workerName }) {
   };
 
   const writeCheckOut = () => {
-    const recordRef = ref(database, `${DB_ATTENDANCE_RECORDS_KEY}/${recordId}`);
+    const recordRef = ref(database, `${DB_KEYS.CHECK_INS}/${recordId}`);
     setCheckedIn(false);
     setRecordId(null);
     update(recordRef, {

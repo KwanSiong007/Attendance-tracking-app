@@ -70,7 +70,6 @@ function LogIn() {
 
   useEffect(() => {
     const fetchRole = async () => {
-      console.log(user);
       const profilesRef = ref(database, DB_KEYS.PROFILES);
       const q = query(profilesRef, orderByChild("userId"), equalTo(user.uid));
       const snapshot = await get(q);

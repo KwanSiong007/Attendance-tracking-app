@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
 import {
@@ -15,6 +15,8 @@ import {
 import { database } from "../firebase";
 
 import WorkerAttendance from "../components/WorkerAttendance";
+import CheckInButton from "../components/CheckInButton";
+import CheckOutButton from "../components/CheckOutButton";
 import { showCurrDate, buildKey } from "../utils";
 import DB_KEYS from "../constants/dbKeys";
 
@@ -248,45 +250,9 @@ function WorkerScreen({ workerId }) {
         }}
       >
         <Typography>{attendanceMsg()}</Typography>
-        {checkedIn === false && (
-          <Button
-            onClick={handleCheckIn}
-            variant="contained"
-            sx={{
-              borderRadius: "50%",
-              width: "160px",
-              height: "160px",
-              fontSize: "h5.fontSize",
-              lineHeight: "1.2",
-              textTransform: "none",
-              backgroundColor: "darkgreen",
-              "&:hover": {
-                backgroundColor: "green",
-              },
-            }}
-          >
-            Check In
-          </Button>
-        )}
+        {checkedIn === false && <CheckInButton handleCheckIn={handleCheckIn} />}
         {checkedIn === true && (
-          <Button
-            onClick={handleCheckOut}
-            variant="contained"
-            sx={{
-              borderRadius: "50%",
-              width: "160px",
-              height: "160px",
-              fontSize: "h5.fontSize",
-              lineHeight: "1.2",
-              textTransform: "none",
-              backgroundColor: "darkred",
-              "&:hover": {
-                backgroundColor: "red",
-              },
-            }}
-          >
-            Check Out
-          </Button>
+          <CheckOutButton handleCheckOut={handleCheckOut} />
         )}
         <Typography>{gpsStatusMsg()}</Typography>
         <Typography sx={{ alignSelf: "flex-start" }}>

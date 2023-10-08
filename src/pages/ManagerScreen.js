@@ -43,7 +43,7 @@ function ManagerScreen() {
           (a, b) =>
             Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
         );
-        console.log("sortedAttendance:", sortedAttendance);
+
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
       },
@@ -63,7 +63,6 @@ function ManagerScreen() {
           };
         });
 
-        console.log(profiles);
         setProfiles(profiles);
       },
       { onlyOnce: false }

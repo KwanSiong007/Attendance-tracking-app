@@ -25,6 +25,7 @@ function LogIn() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     //This declares a function named checkIfLoggedIn which takes a user as an argument.
@@ -59,19 +60,21 @@ function LogIn() {
 
   const signInUser = async () => {
     const user = await signIn(state.email, state.password);
-
     if (user) {
       setIsLoggedIn(true);
       setState({
         email: "",
         password: "",
       });
+    } else {
+      setError(
+        "The username or password you entered is incorrect. Please try again."
+      );
     }
   };
 
   const handleChange = (e) => {
-    let name = e.target.name;
-    let value = e.target.value;
+    const { name, value } = e.target;
     setState({
       ...state,
       [name]: value,
@@ -184,6 +187,7 @@ function LogIn() {
             value={state.password}
             onChange={(e) => handleChange(e)}
           />
+          {error && <div style={{ color: "red" }}>{error}</div>}
           <Button
             type="submit"
             fullWidth

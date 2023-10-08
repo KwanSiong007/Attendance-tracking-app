@@ -105,7 +105,7 @@ function LogIn() {
       });
     } else {
       setError(
-        "The username or password you entered is incorrect. Please try again."
+        "The email or password you entered is incorrect. Please try again."
       );
     }
   };

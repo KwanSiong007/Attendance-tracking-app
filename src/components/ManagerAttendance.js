@@ -8,6 +8,7 @@ import {
   TableRow,
   TableFooter,
   TablePagination,
+  Typography,
 } from "@mui/material";
 import {
   showDate,
@@ -26,7 +27,7 @@ const theme = createTheme({
   },
 });
 
-function ManagerAttendance({ attendance, nowLoaded }) {
+function ManagerAttendance({ attendance, profiles, nowLoaded }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -70,7 +71,9 @@ function ManagerAttendance({ attendance, nowLoaded }) {
                 }}
               >
                 <TableCell>{showDate(row.checkInDateTime)}</TableCell>
-                <TableCell>{row.username}</TableCell>
+                <TableCell>
+                  <Typography>{profiles[row.userId].name}</Typography>
+                </TableCell>
                 <TableCell>{row.worksite}</TableCell>
                 <TableCell>{showCheckInTime(row.checkInDateTime)}</TableCell>
                 <TableCell>

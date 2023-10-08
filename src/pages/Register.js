@@ -29,7 +29,7 @@ import ROLES from "../constants/roles";
 
 function Register() {
   const [state, setState] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     photo: null,
@@ -72,12 +72,12 @@ function Register() {
       }
 
       await updateProfile(user, {
-        displayName: state.username,
+        displayName: state.name,
         photoURL: photoUrl,
       });
 
       const profile = {
-        username: state.username,
+        name: state.name,
         email: state.email,
         photoUrl: photoUrl,
         userId: user.uid,
@@ -172,11 +172,11 @@ function Register() {
             margin="normal"
             required
             fullWidth
-            name="username"
+            name="name"
             label="Full Name"
             autoComplete="name"
             autoFocus
-            value={state.username}
+            value={state.name}
             onChange={(e) => handleChange(e)}
           />
           <InputLabel htmlFor="file-upload" sx={{ mt: 1 }}>

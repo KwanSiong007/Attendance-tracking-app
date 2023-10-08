@@ -16,7 +16,7 @@ import DB_KEYS from "../constants/dbKeys";
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [attendance, setAttendance] = useState([]);
-  const [photos, setPhotos] = useState([]);
+  const [profiles, setProfiles] = useState({});
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
@@ -52,17 +52,18 @@ function ManagerScreen() {
     const unsubscribeProfiles = onValue(
       profilesRef,
       (snapshot) => {
-        let photos = {};
+        let profiles = {};
 
         snapshot.forEach((childSnapshot) => {
           const row = childSnapshot.val();
-          if (row.photoUrl) {
-            photos[row.userId] = row.photoUrl;
-          }
+          profiles[row.userId] = {
+            name: row.name,
+            photoUrl: row.photoUrl,
+          };
         });
 
-        console.log(photos);
-        setPhotos(photos);
+        console.log(profiles);
+        setProfiles(profiles);
       },
       { onlyOnce: false }
     );
@@ -77,7 +78,7 @@ function ManagerScreen() {
     const query = e.target.value;
     setSearchQuery(query);
     const filteredRecords = attendance.filter((record) =>
-      record.username.toLowerCase().includes(query.toLowerCase())
+      record.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredAttendance(filteredRecords);
   };
@@ -112,6 +113,7 @@ function ManagerScreen() {
         />
         <ManagerAttendance
           attendance={filteredAttendance}
+          profiles={profiles}
           nowLoaded={nowLoaded}
         />
       </Box>

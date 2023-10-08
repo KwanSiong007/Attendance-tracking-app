@@ -21,6 +21,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { VisuallyHiddenInput } from "../utils";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DB_PROFILE_KEY = "profile-data";
 const STORAGE_PROFILE_KEY = "profile-data/";
@@ -36,6 +38,18 @@ function Register() {
   });
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+
+  const showSuccessMessage = () => {
+    toast.success("Congratulations! Registration completed!", {
+      position: "top-center",
+      autoClose: 5000, // Close the message after 5 seconds
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  };
 
   const registerUser = async () => {
     try {
@@ -68,12 +82,12 @@ function Register() {
         profilePictureUrl: photoURL,
         userID: user.uid,
       };
-
       console.log("profileData:", profileData);
       const profileRef = ref(database, DB_PROFILE_KEY);
       const newProfileRef = push(profileRef);
       set(newProfileRef, profileData);
 
+      showSuccessMessage();
       setState({
         email: "",
         password: "",
@@ -135,6 +149,8 @@ function Register() {
           gap: 2,
         }}
       >
+        {/* Display toast notifications when registration completed.*/}
+        <ToastContainer />
         <Typography variant="h5">Company Attendance Tracker</Typography>
         <Box
           component="form"

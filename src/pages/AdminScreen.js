@@ -1,17 +1,17 @@
-import { push, ref } from "firebase/database";
+import { get, push, ref } from "firebase/database";
 import { database } from "../firebase";
 import { Box, Button } from "@mui/material";
 
 import DB_KEYS from "../constants/dbKeys";
 
 function AdminScreen() {
-  function getRandomTime(start, end) {
+  const getRandomTime = (start, end) => {
     return new Date(
       start.getTime() + Math.random() * (end.getTime() - start.getTime())
     );
-  }
+  };
 
-  function generateAndPushDummyData() {
+  const generateDummyCheckIns = (recordsRef) => {
     const userIds = [
       "QraQMwlSDOconsJCeGloNZowfFN2",
       "SYCE7o6TV4a6HmRmBPsMvCcv0zm1",
@@ -30,9 +30,7 @@ function AdminScreen() {
     const startDate = new Date("2023-10-02T00:00:00.000+08:00");
     const endDate = new Date("2023-10-09T00:00:00.000+08:00");
 
-    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
-
-    const allCheckIns = [];
+    const dummyCheckIns = [];
 
     for (let d = startDate; d < endDate; d.setDate(d.getDate() + 1)) {
       userIds.forEach((userId) => {
@@ -68,7 +66,7 @@ function AdminScreen() {
             new Date(d.setHours(12, 0, 0, 0)),
             new Date(d.setHours(13, 0, 0, 0))
           );
-          allCheckIns.push({
+          dummyCheckIns.push({
             checkInDateTime: checkIn.toISOString(),
             checkOutDateTime: checkOut.toISOString(),
             userId: userId,
@@ -84,7 +82,7 @@ function AdminScreen() {
           );
         }
 
-        allCheckIns.push({
+        dummyCheckIns.push({
           checkInDateTime: checkIn.toISOString(),
           checkOutDateTime: checkOut ? checkOut.toISOString() : null,
           userId: userId,
@@ -93,14 +91,25 @@ function AdminScreen() {
       });
     }
 
-    allCheckIns.sort(
+    dummyCheckIns.sort(
       (a, b) => new Date(a.checkInDateTime) - new Date(b.checkInDateTime)
     );
 
-    allCheckIns.forEach((checkIn) => {
+    dummyCheckIns.forEach((checkIn) => {
       push(recordsRef, checkIn);
     });
-  }
+  };
+
+  const handleGenerate = () => {
+    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
+    get(recordsRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        console.error("checkIns already contains data");
+      } else {
+        generateDummyCheckIns(recordsRef);
+      }
+    });
+  };
 
   return (
     <Box
@@ -112,8 +121,8 @@ function AdminScreen() {
         mb: 2,
       }}
     >
-      <Button onClick={generateAndPushDummyData} variant="contained">
-        Generate dummy data
+      <Button onClick={handleGenerate} variant="contained">
+        Generate dummy check ins
       </Button>
     </Box>
   );

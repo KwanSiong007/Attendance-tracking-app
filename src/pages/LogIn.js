@@ -24,6 +24,7 @@ import WorkerScreen from "./WorkerScreen";
 import ManagerScreen from "./ManagerScreen";
 import DB_KEYS from "../constants/dbKeys";
 import ROLES from "../constants/roles";
+import AdminScreen from "./AdminScreen";
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -142,8 +143,9 @@ function LogIn() {
     return (
       <div>
         <h1>Welcome, {user.displayName}!</h1>
-        {role === ROLES.MANAGER && <ManagerScreen />}
         {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
+        {role === ROLES.MANAGER && <ManagerScreen />}
+        {role === ROLES.ADMIN && <AdminScreen />}
         <div>
           <Button onClick={handleSignOut} variant="outlined">
             Sign Out

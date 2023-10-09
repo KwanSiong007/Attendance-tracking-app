@@ -11,7 +11,9 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
+import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
+import { showCheckOutTime } from "../utils";
 import DB_KEYS from "../constants/dbKeys";
 
 function ManagerScreen() {
@@ -19,8 +21,13 @@ function ManagerScreen() {
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
+  const [page, setPage] = useState(0);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
+
+  const [workerCount, setWorkerCount] = useState(null);
+  const [countsByWorksite, setCountsByWorksite] = useState(null);
 
   useEffect(() => {
     const nowLoaded = new Date();
@@ -46,6 +53,22 @@ function ManagerScreen() {
 
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
+
+        const countsByWorksite = attendance.reduce((acc, row) => {
+          if (
+            row.checkInDateTime &&
+            showCheckOutTime(
+              row.checkInDateTime,
+              row.checkOutDateTime,
+              nowLoaded
+            ) === "Pending"
+          ) {
+            acc[row.worksite] = (acc[row.worksite] || 0) + 1;
+          }
+          return acc;
+        }, {});
+
+        setCountsByWorksite(countsByWorksite);
       },
       { onlyOnce: false }
     );
@@ -59,11 +82,18 @@ function ManagerScreen() {
           const row = childSnapshot.val();
           profiles[row.userId] = {
             name: row.name,
+            role: row.role,
             photoUrl: row.photoUrl,
           };
         });
 
         setProfiles(profiles);
+
+        const workerCount = Object.values(profiles).reduce((count, profile) => {
+          return count + (profile.role === "worker" ? 1 : 0);
+        }, 0);
+
+        setWorkerCount(workerCount);
       },
       { onlyOnce: false }
     );
@@ -77,10 +107,12 @@ function ManagerScreen() {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    const filteredRecords = attendance.filter((row) =>
+    const filteredAttendance = attendance.filter((row) =>
       profiles[row.userId].name.toLowerCase().includes(query.toLowerCase())
     );
-    setFilteredAttendance(filteredRecords);
+
+    setPage(0);
+    setFilteredAttendance(filteredAttendance);
   };
 
   return (
@@ -94,8 +126,17 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && profiles ? (
+        {attendance && countsByWorksite && profiles ? (
           <>
+            <Container sx={{ height: "300px" }}>
+              <WorksitePie
+                pieData={Object.keys(countsByWorksite).map((worksite) => ({
+                  id: worksite,
+                  label: worksite,
+                  value: countsByWorksite[worksite],
+                }))}
+              />
+            </Container>
             <TextField
               id="outlined-basic"
               variant="outlined"
@@ -117,6 +158,8 @@ function ManagerScreen() {
               attendance={filteredAttendance}
               profiles={profiles}
               nowLoaded={nowLoaded}
+              page={page}
+              setPage={setPage}
             />
           </>
         ) : (

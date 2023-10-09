@@ -20,6 +20,8 @@ function ManagerScreen() {
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
+  const [page, setPage] = useState(0);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
@@ -107,6 +109,8 @@ function ManagerScreen() {
     const filteredAttendance = attendance.filter((row) =>
       profiles[row.userId].name.toLowerCase().includes(query.toLowerCase())
     );
+
+    setPage(0);
     setFilteredAttendance(filteredAttendance);
   };
 
@@ -144,6 +148,8 @@ function ManagerScreen() {
               attendance={filteredAttendance}
               profiles={profiles}
               nowLoaded={nowLoaded}
+              page={page}
+              setPage={setPage}
             />
           </>
         ) : (

@@ -31,8 +31,7 @@ const theme = createTheme({
   },
 });
 
-function ManagerAttendance({ attendance, profiles, nowLoaded }) {
-  const [page, setPage] = useState(0);
+function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleChangePage = (e, newPage) => {

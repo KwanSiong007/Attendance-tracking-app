@@ -20,20 +20,20 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { VisuallyHiddenInput } from "../utils";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const DB_PROFILE_KEY = "profile-data";
-const STORAGE_PROFILE_KEY = "profile-data/";
+import { VisuallyHiddenInput } from "../utils";
+import DB_KEYS from "../constants/dbKeys";
+import ROLES from "../constants/roles";
 
 function Register() {
   const [state, setState] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     photo: null,
-    photoPreviewURL: null,
+    photoPreviewUrl: null,
     confirmPassword: "",
   });
   const [passwordError, setPasswordError] = useState(false);
@@ -61,41 +61,42 @@ function Register() {
 
       const user = await register(state.email, state.password);
 
-      let photoURL = null;
+      let photoUrl = null;
       if (state.photo) {
         const fullStorageRef = storageRef(
           storage,
-          STORAGE_PROFILE_KEY + state.photo.name
+          DB_KEYS.PROFILES + "/" + state.photo.name
         );
         await uploadBytes(fullStorageRef, state.photo);
-        photoURL = await getDownloadURL(fullStorageRef, state.photo.name);
+        photoUrl = await getDownloadURL(fullStorageRef, state.photo.name);
       }
 
       await updateProfile(user, {
-        displayName: state.username,
-        photoURL,
+        displayName: state.name,
+        photoURL: photoUrl,
       });
 
-      const profileData = {
-        username: state.username,
+      const profile = {
+        name: state.name,
         email: state.email,
-        profilePictureUrl: photoURL,
-        userID: user.uid,
+        photoUrl: photoUrl,
+        userId: user.uid,
+        role: ROLES.WORKER,
       };
-      console.log("profileData:", profileData);
-      const profileRef = ref(database, DB_PROFILE_KEY);
+      // console.log("profile:", profile);
+      const profileRef = ref(database, DB_KEYS.PROFILES);
       const newProfileRef = push(profileRef);
-      set(newProfileRef, profileData);
+      set(newProfileRef, profile);
 
       showSuccessMessage();
       setState({
         email: "",
         password: "",
-        username: "",
+        name: "",
         photo: null,
         confirmPassword: "",
       });
-      console.log("User registered:", user);
+      // console.log("User registered:", user);
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -126,12 +127,12 @@ function Register() {
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; // Get the first selected file
     if (file) {
-      const previewURL = URL.createObjectURL(file);
+      const previewUrl = URL.createObjectURL(file);
 
       setState({
         ...state,
         photo: file,
-        photoPreviewURL: previewURL,
+        photoPreviewUrl: previewUrl,
       });
     }
   };
@@ -171,18 +172,18 @@ function Register() {
             margin="normal"
             required
             fullWidth
-            name="username"
+            name="name"
             label="Full Name"
             autoComplete="name"
             autoFocus
-            value={state.username}
+            value={state.name}
             onChange={(e) => handleChange(e)}
           />
           <InputLabel htmlFor="file-upload" sx={{ mt: 1 }}>
             Profile Photo
           </InputLabel>
           {state.photo && (
-            <Image src={state.photoPreviewURL} width="200px" height="200px" />
+            <Image src={state.photoPreviewUrl} width="200px" height="200px" />
           )}
           <Button
             component="label"

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, CircularProgress, Container, Typography } from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
-import { showCurrDate, buildKey } from "../utils";
 import {
   push,
   ref,
@@ -14,9 +13,12 @@ import {
   update,
 } from "firebase/database";
 import { database } from "../firebase";
-import WorkerAttendance from "../components/WorkerAttendance";
 
-const DB_ATTENDANCE_RECORDS_KEY = "action";
+import WorkerAttendance from "../components/WorkerAttendance";
+import CheckInButton from "../components/CheckInButton";
+import CheckOutButton from "../components/CheckOutButton";
+import { showCurrDate, buildKey } from "../utils";
+import DB_KEYS from "../constants/dbKeys";
 
 const GPS_STATUS = {
   OFF: "off",
@@ -27,9 +29,9 @@ const GPS_STATUS = {
   ERROR: "error",
 };
 
-function WorkerScreen({ userData }) {
+function WorkerScreen({ workerId }) {
   const [nowLoaded, setNowLoaded] = useState(null);
-  const [currDate, setCurrDate] = useState([]);
+  const [currDate, setCurrDate] = useState("");
 
   const [attendance, setAttendance] = useState([]);
   const [checkedIn, setCheckedIn] = useState(null);
@@ -42,9 +44,9 @@ function WorkerScreen({ userData }) {
   useEffect(() => {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
-    const searchKey = buildKey(userData.userID, nowLoaded);
+    const searchKey = buildKey(workerId, nowLoaded);
     setCurrDate(showCurrDate(nowLoaded));
-    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
     const unsubscribe = onValue(
@@ -86,7 +88,7 @@ function WorkerScreen({ userData }) {
     );
 
     return () => unsubscribe();
-  }, [userData.userID]);
+  }, [workerId]);
 
   const sites = [
     {
@@ -112,7 +114,7 @@ function WorkerScreen({ userData }) {
     for (let site of sites) {
       const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
       const distance = findDistance(userPoint, sitePoint);
-      console.log(`Distance of ${distance} km from ${site.name}.`);
+      // console.log(`Distance of ${distance} km from ${site.name}.`);
       if (distance < site.radius) {
         setGpsSite(site.name);
         return site;
@@ -160,17 +162,16 @@ function WorkerScreen({ userData }) {
   };
 
   const writeCheckIn = (site) => {
-    const searchKey = buildKey(userData.userID, new Date());
-    const recordsRef = ref(database, DB_ATTENDANCE_RECORDS_KEY);
+    const searchKey = buildKey(workerId, new Date());
+    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
     const newRecordRef = push(recordsRef);
 
     setCheckedIn(true);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
-      userID: userData.userID,
+      userId: workerId,
       checkInDateTime: new Date().toISOString(),
       checkInKey: searchKey,
-      username: userData.username,
       worksite: site.name,
     });
   };
@@ -187,7 +188,7 @@ function WorkerScreen({ userData }) {
   };
 
   const writeCheckOut = () => {
-    const recordRef = ref(database, `${DB_ATTENDANCE_RECORDS_KEY}/${recordId}`);
+    const recordRef = ref(database, `${DB_KEYS.CHECK_INS}/${recordId}`);
     setCheckedIn(false);
     setRecordId(null);
     update(recordRef, {
@@ -248,52 +249,24 @@ function WorkerScreen({ userData }) {
           mb: 2,
         }}
       >
-        <Typography>{attendanceMsg()}</Typography>
-        {checkedIn === false && (
-          <Button
-            onClick={handleCheckIn}
-            variant="contained"
-            sx={{
-              borderRadius: "50%",
-              width: "160px",
-              height: "160px",
-              fontSize: "h5.fontSize",
-              lineHeight: "1.2",
-              textTransform: "none",
-              backgroundColor: "darkgreen",
-              "&:hover": {
-                backgroundColor: "green",
-              },
-            }}
-          >
-            Check In
-          </Button>
+        {checkedIn !== null ? (
+          <>
+            <Typography>{attendanceMsg()}</Typography>
+            {checkedIn === false && (
+              <CheckInButton handleCheckIn={handleCheckIn} />
+            )}
+            {checkedIn === true && (
+              <CheckOutButton handleCheckOut={handleCheckOut} />
+            )}
+            <Typography>{gpsStatusMsg()}</Typography>
+            <Typography sx={{ alignSelf: "flex-start" }}>
+              Showing your check ins today ({currDate}):
+            </Typography>
+            <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
+          </>
+        ) : (
+          <CircularProgress />
         )}
-        {checkedIn === true && (
-          <Button
-            onClick={handleCheckOut}
-            variant="contained"
-            sx={{
-              borderRadius: "50%",
-              width: "160px",
-              height: "160px",
-              fontSize: "h5.fontSize",
-              lineHeight: "1.2",
-              textTransform: "none",
-              backgroundColor: "darkred",
-              "&:hover": {
-                backgroundColor: "red",
-              },
-            }}
-          >
-            Check Out
-          </Button>
-        )}
-        <Typography>{gpsStatusMsg()}</Typography>
-        <Box sx={{ alignSelf: "flex-start" }}>
-          <Typography>Showing your check ins today ({currDate}):</Typography>
-        </Box>
-        <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
       </Box>
     </Container>
   );

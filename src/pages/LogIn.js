@@ -9,16 +9,26 @@ import {
   Typography,
 } from "@mui/material";
 import { signIn, reAuth, logOut } from "../api/authentication";
-import WorkerScreen from "./WorkerScreen";
-import ManagerScreen from "./ManagerScreen";
-import { push, ref, set } from "firebase/database";
+import {
+  push,
+  ref,
+  set,
+  query,
+  orderByChild,
+  equalTo,
+  get,
+} from "firebase/database";
 import { database } from "../firebase";
 
-const DB_LOGGED_IN_USER_KEY = "logged_in_user";
+import WorkerScreen from "./WorkerScreen";
+import ManagerScreen from "./ManagerScreen";
+import DB_KEYS from "../constants/dbKeys";
+import ROLES from "../constants/roles";
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({});
+  const [role, setRole] = useState("");
   //The loading state is used to indicate whether the authentication check is still in progress.
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
@@ -40,7 +50,7 @@ function LogIn() {
         setLoading(false);
         // User is signed in, see docs for a list of available properties
         setUser(user);
-        console.log("user", user);
+        // console.log("user", user);
       }
       //If there's no user, it means the user is not logged in or signed out, so it does the following:
       //Sets the loading state to false, indicating that the loading process is complete.
@@ -58,9 +68,36 @@ function LogIn() {
     reAuth(checkIfLoggedIn);
   }, []);
 
+  useEffect(() => {
+    const fetchRole = async () => {
+      const profilesRef = ref(database, DB_KEYS.PROFILES);
+      const q = query(profilesRef, orderByChild("userId"), equalTo(user.uid));
+      const snapshot = await get(q);
+
+      snapshot.forEach((childSnapshot) => {
+        const profile = childSnapshot.val();
+        setRole(profile.role);
+      });
+    };
+
+    if (user.uid) {
+      fetchRole();
+    }
+  }, [user]);
+
   const signInUser = async () => {
     const user = await signIn(state.email, state.password);
+
     if (user) {
+      const logIn = {
+        userId: user.uid,
+        logInDateTime: new Date().toISOString(),
+      };
+      const logInsRef = ref(database, DB_KEYS.LOG_INS);
+      const newLogInRef = push(logInsRef);
+      set(newLogInRef, logIn);
+      // console.log("logIn", logIn);
+
       setIsLoggedIn(true);
       setState({
         email: "",
@@ -68,7 +105,7 @@ function LogIn() {
       });
     } else {
       setError(
-        "The username or password you entered is incorrect. Please try again."
+        "The email or password you entered is incorrect. Please try again."
       );
     }
   };
@@ -85,6 +122,7 @@ function LogIn() {
     await logOut();
     setIsLoggedIn(false);
     setUser({});
+    setRole("");
   };
 
   // when first load the page, the logic in the useEffect above is executed
@@ -101,36 +139,15 @@ function LogIn() {
 
   // if the user is already signed in, display the below page
   if (isLoggedIn) {
-    const loggedInUserData = {
-      username: user.displayName,
-      email: user.email,
-      userID: user.uid,
-    };
-    const loggedInRef = ref(database, DB_LOGGED_IN_USER_KEY);
-    const newLoggedInRef = push(loggedInRef);
-    set(newLoggedInRef, loggedInUserData);
-    console.log("loggedInUserData", loggedInUserData);
-
-    const checkManagerRole = () => {
-      if (user.uid === "0HLQ3NGKpCZt0LNlT0vET0so7Ip1") {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    const isManager = checkManagerRole();
-
     return (
       <div>
         <h1>Welcome, {user.displayName}!</h1>
-        {isManager ? (
-          <ManagerScreen />
-        ) : (
-          <WorkerScreen userData={loggedInUserData} />
-        )}
+        {role === ROLES.MANAGER && <ManagerScreen />}
+        {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
         <div>
-          <button onClick={handleSignOut}>Sign Out</button>
+          <Button onClick={handleSignOut} variant="outlined">
+            Sign Out
+          </Button>
         </div>
       </div>
     );

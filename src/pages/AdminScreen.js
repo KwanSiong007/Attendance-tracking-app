@@ -28,7 +28,7 @@ function AdminScreen() {
     ];
     const worksites = ["Jurong", "Paya Lebar", "Tanjong Pagar", "Woodlands"];
     const startDate = new Date("2023-10-02T00:00:00.000+08:00");
-    const endDate = new Date("2023-10-09T00:00:00.000+08:00");
+    const endDate = new Date("2023-10-11T00:00:00.000+08:00");
 
     const dummyCheckIns = [];
 

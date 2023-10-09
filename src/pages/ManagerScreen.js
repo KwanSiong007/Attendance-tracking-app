@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
+import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
 import { showCheckOutTime } from "../utils";
 import DB_KEYS from "../constants/dbKeys";
@@ -125,8 +126,17 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && profiles ? (
+        {attendance && countsByWorksite && profiles ? (
           <>
+            <Container sx={{ height: "300px" }}>
+              <WorksitePie
+                pieData={Object.keys(countsByWorksite).map((worksite) => ({
+                  id: worksite,
+                  label: worksite,
+                  value: countsByWorksite[worksite],
+                }))}
+              />
+            </Container>
             <TextField
               id="outlined-basic"
               variant="outlined"

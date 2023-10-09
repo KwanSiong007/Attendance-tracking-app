@@ -92,12 +92,22 @@ function WorkerScreen({ workerId }) {
 
   const sites = [
     {
-      name: "Tanjong Pagar MRT",
+      name: "Jurong",
+      coordinates: { lat: 1.3334577950596898, lng: 103.74222501072371 },
+      radius: 1,
+    },
+    {
+      name: "Paya Lebar",
+      coordinates: { lat: 1.3183859445834136, lng: 103.89305776654058 },
+      radius: 1,
+    },
+    {
+      name: "Tanjong Pagar",
       coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
       radius: 1,
     },
     {
-      name: "Woodlands MRT",
+      name: "Woodlands",
       coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
       radius: 1,
     },

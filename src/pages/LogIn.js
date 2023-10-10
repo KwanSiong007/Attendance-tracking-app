@@ -23,8 +23,8 @@ import { database } from "../firebase";
 
 import WorkerScreen from "./WorkerScreen";
 import ManagerScreen from "./ManagerScreen";
-import DB_KEYS from "../constants/dbKeys";
-import ROLES from "../constants/roles";
+import DB_KEY from "../constants/dbKey";
+import ROLE from "../constants/role";
 import AdminScreen from "./AdminScreen";
 
 const theme = createTheme({
@@ -95,7 +95,7 @@ function LogIn() {
 
   useEffect(() => {
     const fetchRole = async () => {
-      const profilesRef = ref(database, DB_KEYS.PROFILES);
+      const profilesRef = ref(database, DB_KEY.PROFILES);
       const q = query(profilesRef, orderByChild("userId"), equalTo(user.uid));
       const snapshot = await get(q);
 
@@ -118,7 +118,7 @@ function LogIn() {
         userId: user.uid,
         logInDateTime: new Date().toISOString(),
       };
-      const logInsRef = ref(database, DB_KEYS.LOG_INS);
+      const logInsRef = ref(database, DB_KEY.LOG_INS);
       const newLogInRef = push(logInsRef);
       set(newLogInRef, logIn);
       // console.log("logIn", logIn);
@@ -168,9 +168,9 @@ function LogIn() {
       <div>
         <h1>Welcome, {user.displayName}!</h1>
         <ThemeProvider theme={theme}>
-          {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
-          {role === ROLES.MANAGER && <ManagerScreen />}
-          {role === ROLES.ADMIN && <AdminScreen />}
+          {role === ROLE.WORKER && <WorkerScreen workerId={user.uid} />}
+          {role === ROLE.MANAGER && <ManagerScreen />}
+          {role === ROLE.ADMIN && <AdminScreen />}
         </ThemeProvider>
         <div>
           <Button onClick={handleSignOut} variant="outlined">

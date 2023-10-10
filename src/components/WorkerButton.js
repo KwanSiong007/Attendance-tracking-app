@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress } from "@mui/material";
 
-import WORKER_BUTTON_TYPES from "../constants/workerButtonTypes";
+import WORKER_BUTTON_TYPE from "../constants/workerButtonType";
 
 const HOLD_DURATION = 1000; // in milliseconds
 
 function WorkerButton({ buttonType, handleHold }) {
-  const checkInButton = buttonType === WORKER_BUTTON_TYPES.CHECK_IN;
+  const checkInButton = buttonType === WORKER_BUTTON_TYPE.CHECK_IN;
   const [holding, setHolding] = useState(false);
 
   const handleStart = () => {

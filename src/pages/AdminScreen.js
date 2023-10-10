@@ -2,7 +2,7 @@ import { get, push, ref } from "firebase/database";
 import { database } from "../firebase";
 import { Box, Button } from "@mui/material";
 
-import DB_KEYS from "../constants/dbKeys";
+import DB_KEY from "../constants/dbKey";
 
 function AdminScreen() {
   const getRandomTime = (start, end) => {
@@ -101,7 +101,7 @@ function AdminScreen() {
   };
 
   const handleGenerate = () => {
-    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
+    const recordsRef = ref(database, DB_KEY.CHECK_INS);
     get(recordsRef).then((snapshot) => {
       if (snapshot.exists()) {
         console.error("checkIns already contains data");

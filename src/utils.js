@@ -15,8 +15,12 @@ const buildKey = (userId, dateObj) => {
   return `${userId}_${extractDate(dateObj)}`;
 };
 
-const showDate = (isoString) => {
-  return format(parseISO(isoString), "EEE, d MMM");
+const showDate = (isoString, isSmallScreen) => {
+  if (!isSmallScreen) {
+    return format(parseISO(isoString), "EEE, d MMM");
+  } else {
+    return format(parseISO(isoString), "d MMM");
+  }
 };
 
 const showCurrDate = (dateObj) => {
@@ -44,8 +48,8 @@ const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
     const hoursDiff = differenceInHours(end, start);
     const minsDiff = differenceInMinutes(end, start) % 60;
 
-    const hoursStr = `${hoursDiff} hour${hoursDiff === 1 ? "" : "s"}`;
-    const minsStr = `${minsDiff} min${minsDiff === 1 ? "" : "s"}`;
+    const hoursStr = `${hoursDiff} h`;
+    const minsStr = `${minsDiff} min`;
 
     if (hoursDiff === 0) {
       return minsStr;

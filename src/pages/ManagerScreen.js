@@ -128,7 +128,11 @@ function ManagerScreen() {
       >
         {attendance && countsByWorksite && profiles ? (
           <>
-            <Container sx={{ height: "300px" }}>
+            <Container
+              sx={{
+                height: "300px",
+              }}
+            >
               <WorksitePie
                 pieData={Object.keys(countsByWorksite).map((worksite) => ({
                   id: worksite,

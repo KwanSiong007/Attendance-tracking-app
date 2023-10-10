@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Avatar,
   Box,
   Paper,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Table,
   TableBody,
   TableCell,
@@ -14,6 +17,9 @@ import {
   TablePagination,
   Typography,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+
 import {
   showDate,
   showCheckInTime,
@@ -21,18 +27,12 @@ import {
   showTimeDiff,
 } from "../utils";
 
-const theme = createTheme({
-  components: {
-    MuiMenuItem: {
-      styleOverrides: {
-        root: ({ theme }) => ({ fontSize: theme.typography.body2.fontSize }),
-      },
-    },
-  },
-});
-
 function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleChangePage = (e, newPage) => {
     setPage(newPage);
@@ -43,8 +43,8 @@ function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
     setPage(0);
   };
 
-  return (
-    <ThemeProvider theme={theme}>
+  if (!isMobileScreen) {
+    return (
       <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table size="small">
           <TableHead>
@@ -55,12 +55,16 @@ function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
                 "Work Site",
                 "Check In Time",
                 "Check Out Time",
-                "Duration Worked",
               ].map((headCell) => (
                 <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
                   {headCell}
                 </TableCell>
               ))}
+              {!isMediumScreen && (
+                <TableCell key="Duration Worked" sx={{ fontWeight: "bold" }}>
+                  Duration Worked
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -71,13 +75,19 @@ function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
                   key={`${row.userId}_${row.checkInDateTime}`}
                   sx={{
                     backgroundColor:
-                      index % 2 === 1 ? "action.hover" : "transparent",
+                      index % 2 === 1 ? "transparent" : "action.hover",
                   }}
                 >
-                  <TableCell>{showDate(row.checkInDateTime)}</TableCell>
+                  <TableCell>
+                    {showDate(row.checkInDateTime, isSmallScreen)}
+                  </TableCell>
                   <TableCell>
                     <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.25 }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
                     >
                       <Avatar
                         src={profiles[row.userId].photoUrl}
@@ -98,13 +108,15 @@ function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
                       nowLoaded
                     )}
                   </TableCell>
-                  <TableCell>
-                    {showTimeDiff(
-                      row.checkInDateTime,
-                      row.checkOutDateTime,
-                      nowLoaded
-                    )}
-                  </TableCell>
+                  {!isMediumScreen && (
+                    <TableCell>
+                      {showTimeDiff(
+                        row.checkInDateTime,
+                        row.checkOutDateTime,
+                        nowLoaded
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
           </TableBody>
@@ -127,8 +139,28 @@ function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
           </TableFooter>
         </Table>
       </TableContainer>
-    </ThemeProvider>
-  );
+    );
+  } else {
+    return (
+      <List>
+        {attendance.map((row) => (
+          <ListItem key={`${row.userId}_${row.checkInDateTime}`}>
+            <ListItemAvatar>
+              <Avatar
+                src={profiles[row.userId].photoUrl}
+                sx={{ width: 40, height: 40 }}
+                variant="square"
+              ></Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={row.worksite}
+              secondary={showCheckInTime(row.checkInDateTime)}
+            />
+          </ListItem>
+        ))}
+      </List>
+    );
+  }
 }
 
 export default ManagerAttendance;

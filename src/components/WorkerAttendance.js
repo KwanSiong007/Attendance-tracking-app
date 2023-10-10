@@ -49,7 +49,7 @@ function WorkerAttendance({ attendance, nowLoaded }) {
               key={`${row.userId}_${row.checkInDateTime}`}
               sx={{
                 backgroundColor:
-                  index % 2 === 1 ? "action.hover" : "transparent",
+                  index % 2 === 1 ? "transparent" : "action.hover",
               }}
             >
               <TableCell>{showDate(row.checkInDateTime)}</TableCell>

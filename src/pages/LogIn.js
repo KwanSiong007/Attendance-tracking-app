@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { signIn, reAuth, logOut } from "../api/authentication";
 import {
   push,
@@ -25,6 +26,29 @@ import ManagerScreen from "./ManagerScreen";
 import DB_KEYS from "../constants/dbKeys";
 import ROLES from "../constants/roles";
 import AdminScreen from "./AdminScreen";
+
+const theme = createTheme({
+  breakpoints: {
+    values: {
+      ...createTheme().breakpoints.values,
+      mobile: 480,
+    },
+  },
+  components: {
+    MuiMenuItem: {
+      styleOverrides: {
+        root: ({ theme }) => ({ fontSize: theme.typography.body2.fontSize }),
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          padding: "6px 10px",
+        },
+      },
+    },
+  },
+});
 
 function LogIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -143,9 +167,11 @@ function LogIn() {
     return (
       <div>
         <h1>Welcome, {user.displayName}!</h1>
-        {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
-        {role === ROLES.MANAGER && <ManagerScreen />}
-        {role === ROLES.ADMIN && <AdminScreen />}
+        <ThemeProvider theme={theme}>
+          {role === ROLES.WORKER && <WorkerScreen workerId={user.uid} />}
+          {role === ROLES.MANAGER && <ManagerScreen />}
+          {role === ROLES.ADMIN && <AdminScreen />}
+        </ThemeProvider>
         <div>
           <Button onClick={handleSignOut} variant="outlined">
             Sign Out

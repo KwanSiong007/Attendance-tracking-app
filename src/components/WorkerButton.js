@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 
 import WORKER_BUTTON_TYPES from "../constants/workerButtonTypes";
 
@@ -9,7 +9,7 @@ function WorkerButton({ buttonType, handleHold }) {
   const checkInButton = buttonType === WORKER_BUTTON_TYPES.CHECK_IN;
   const [holding, setHolding] = useState(false);
 
-  const handleMouseDown = () => {
+  const handleStart = () => {
     setHolding(true);
     const startTime = Date.now();
 
@@ -23,22 +23,25 @@ function WorkerButton({ buttonType, handleHold }) {
       }
     }, 50);
 
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setHolding(false);
       clearInterval(intervalId);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mouseleave", handleMouseUp);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("mouseleave", handleEnd);
+      window.removeEventListener("touchend", handleEnd);
     };
 
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mouseleave", handleMouseUp);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("mouseleave", handleEnd);
+    window.addEventListener("touchend", handleEnd);
   };
 
   return (
     <>
       <Box position="relative">
         <Button
-          onMouseDown={handleMouseDown}
+          onMouseDown={handleStart}
+          onTouchStart={handleStart}
           variant="contained"
           sx={{
             borderRadius: "50%",
@@ -66,7 +69,6 @@ function WorkerButton({ buttonType, handleHold }) {
               left: "50%",
               marginTop: "-80px",
               marginLeft: "-80px",
-              zIndex: 1,
               color: checkInButton ? "green" : "red",
             }}
           />

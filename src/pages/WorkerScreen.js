@@ -15,10 +15,10 @@ import {
 import { database } from "../firebase";
 
 import WorkerAttendance from "../components/WorkerAttendance";
-import CheckInButton from "../components/CheckInButton";
-import CheckOutButton from "../components/CheckOutButton";
+import WorkerButton from "../components/WorkerButton";
 import { showCurrDate, buildKey } from "../utils";
 import DB_KEYS from "../constants/dbKeys";
+import WORKER_BUTTON_TYPES from "../constants/workerButtonTypes";
 
 const GPS_STATUS = {
   OFF: "off",
@@ -263,10 +263,16 @@ function WorkerScreen({ workerId }) {
           <>
             <Typography>{attendanceMsg()}</Typography>
             {checkedIn === false && (
-              <CheckInButton handleCheckIn={handleCheckIn} />
+              <WorkerButton
+                buttonType={WORKER_BUTTON_TYPES.CHECK_IN}
+                handleHold={handleCheckIn}
+              />
             )}
             {checkedIn === true && (
-              <CheckOutButton handleCheckOut={handleCheckOut} />
+              <WorkerButton
+                buttonType={WORKER_BUTTON_TYPES.CHECK_OUT}
+                handleHold={handleCheckOut}
+              />
             )}
             <Typography>{gpsStatusMsg()}</Typography>
             <Typography sx={{ alignSelf: "flex-start" }}>

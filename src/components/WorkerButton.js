@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 
+import WORKER_BUTTON_TYPES from "../constants/workerButtonTypes";
+
 const HOLD_DURATION = 1000; // in milliseconds
 
-function CheckOutButton({ handleCheckOut }) {
+function WorkerButton({ buttonType, handleHold }) {
+  const checkInButton = buttonType === WORKER_BUTTON_TYPES.CHECK_IN;
   const [holding, setHolding] = useState(false);
 
   const handleMouseDown = () => {
@@ -14,7 +17,7 @@ function CheckOutButton({ handleCheckOut }) {
       const elapsedTime = Date.now() - startTime;
 
       if (elapsedTime >= HOLD_DURATION) {
-        handleCheckOut();
+        handleHold();
         setHolding(false);
         clearInterval(intervalId);
       }
@@ -33,7 +36,6 @@ function CheckOutButton({ handleCheckOut }) {
 
   return (
     <>
-      <Typography>{`${holding}`}</Typography>
       <Box position="relative">
         <Button
           onMouseDown={handleMouseDown}
@@ -45,15 +47,15 @@ function CheckOutButton({ handleCheckOut }) {
             fontSize: "h5.fontSize",
             lineHeight: "1.5",
             textTransform: "none",
-            backgroundColor: "darkred",
+            backgroundColor: checkInButton ? "darkgreen" : "darkred",
             "&:hover": {
-              backgroundColor: "red",
+              backgroundColor: checkInButton ? "green" : "red",
             },
             opacity: holding ? 0.2 : 1,
             transition: "opacity 1s",
           }}
         >
-          {!holding && "Hold to Check Out"}
+          {!holding && `Hold to ${checkInButton ? "Check In" : "Check Out"}`}
         </Button>
         {holding && (
           <CircularProgress
@@ -65,7 +67,7 @@ function CheckOutButton({ handleCheckOut }) {
               marginTop: "-80px",
               marginLeft: "-80px",
               zIndex: 1,
-              color: "red",
+              color: checkInButton ? "green" : "red",
             }}
           />
         )}
@@ -74,4 +76,4 @@ function CheckOutButton({ handleCheckOut }) {
   );
 }
 
-export default CheckOutButton;
+export default WorkerButton;

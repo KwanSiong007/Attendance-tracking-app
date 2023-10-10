@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Typography,
+} from "@mui/material";
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
 import {
@@ -15,16 +21,24 @@ import {
 import { database } from "../firebase";
 
 import WorkerAttendance from "../components/WorkerAttendance";
-import CheckInButton from "../components/CheckInButton";
-import CheckOutButton from "../components/CheckOutButton";
+import WorkerButton from "../components/WorkerButton";
 import { showCurrDate, buildKey } from "../utils";
-import DB_KEYS from "../constants/dbKeys";
+import DB_KEY from "../constants/dbKey";
+import WORKER_BUTTON_TYPE from "../constants/workerButtonType";
+
+const ATTENDANCE_STATUS = {
+  LOADING: "loading",
+  CHECKED_IN: "checkedIn",
+  CHECKED_OUT: "checkedOut",
+  CHECKING_IN: "checkingIn",
+  CHECKING_OUT: "checkingOut",
+};
 
 const GPS_STATUS = {
   OFF: "off",
   REQUESTING: "requesting",
   ON: "on",
-  NOT_SUPPORTED: "not-supported",
+  NOT_SUPPORTED: "notSupported",
   DENIED: "denied",
   ERROR: "error",
 };
@@ -34,7 +48,9 @@ function WorkerScreen({ workerId }) {
   const [currDate, setCurrDate] = useState("");
 
   const [attendance, setAttendance] = useState([]);
-  const [checkedIn, setCheckedIn] = useState(null);
+  const [attendanceStatus, setAttendanceStatus] = useState(
+    ATTENDANCE_STATUS.LOADING
+  );
   const [checkedInSite, setCheckedInSite] = useState(null);
   const [recordId, setRecordId] = useState(null);
 
@@ -46,14 +62,14 @@ function WorkerScreen({ workerId }) {
     setNowLoaded(nowLoaded);
     const searchKey = buildKey(workerId, nowLoaded);
     setCurrDate(showCurrDate(nowLoaded));
-    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
+    const recordsRef = ref(database, DB_KEY.CHECK_INS);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));
 
     const unsubscribe = onValue(
       q,
       (snapshot) => {
         let attendance = [];
-        let checkedIn = false;
+        let attendanceStatus = ATTENDANCE_STATUS.CHECKED_OUT;
         let siteName = null;
         let recordId = null;
 
@@ -66,7 +82,7 @@ function WorkerScreen({ workerId }) {
           });
 
           if (!row.checkOutDateTime) {
-            checkedIn = true;
+            attendanceStatus = ATTENDANCE_STATUS.CHECKED_IN;
             siteName = row.worksite;
             recordId = childSnapshot.key;
           }
@@ -78,7 +94,7 @@ function WorkerScreen({ workerId }) {
         );
 
         setAttendance(sortedAttendance);
-        setCheckedIn(checkedIn);
+        setAttendanceStatus(attendanceStatus);
         setCheckedInSite(siteName);
         setRecordId(recordId);
       },
@@ -173,10 +189,10 @@ function WorkerScreen({ workerId }) {
 
   const writeCheckIn = (site) => {
     const searchKey = buildKey(workerId, new Date());
-    const recordsRef = ref(database, DB_KEYS.CHECK_INS);
+    const recordsRef = ref(database, DB_KEY.CHECK_INS);
     const newRecordRef = push(recordsRef);
 
-    setCheckedIn(true);
+    setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_IN);
     setRecordId(newRecordRef.key);
     set(newRecordRef, {
       userId: workerId,
@@ -187,6 +203,7 @@ function WorkerScreen({ workerId }) {
   };
 
   const handleCheckIn = async () => {
+    setAttendanceStatus(ATTENDANCE_STATUS.CHECKING_IN);
     try {
       const site = await locateWorker();
       if (site) {
@@ -198,8 +215,8 @@ function WorkerScreen({ workerId }) {
   };
 
   const writeCheckOut = () => {
-    const recordRef = ref(database, `${DB_KEYS.CHECK_INS}/${recordId}`);
-    setCheckedIn(false);
+    const recordRef = ref(database, `${DB_KEY.CHECK_INS}/${recordId}`);
+    setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_OUT);
     setRecordId(null);
     update(recordRef, {
       checkOutDateTime: new Date().toISOString(),
@@ -207,6 +224,7 @@ function WorkerScreen({ workerId }) {
   };
 
   const handleCheckOut = async () => {
+    setAttendanceStatus(ATTENDANCE_STATUS.CHECKING_OUT);
     try {
       const site = await locateWorker();
       if (site?.name === checkedInSite) {
@@ -241,10 +259,17 @@ function WorkerScreen({ workerId }) {
   };
 
   const attendanceMsg = () => {
-    if (checkedIn === true) {
-      return `Checked in at ${checkedInSite}.`;
-    } else if (checkedIn === false) {
-      return "Checked out.";
+    switch (attendanceStatus) {
+      case ATTENDANCE_STATUS.CHECKED_IN:
+        return `Checked in at ${checkedInSite}.`;
+      case ATTENDANCE_STATUS.CHECKED_OUT:
+        return "Checked out.";
+      case ATTENDANCE_STATUS.CHECKING_IN:
+        return "Checking in...";
+      case ATTENDANCE_STATUS.CHECKING_OUT:
+        return "Checking out...";
+      default:
+        return;
     }
   };
 
@@ -259,14 +284,34 @@ function WorkerScreen({ workerId }) {
           mb: 2,
         }}
       >
-        {checkedIn !== null ? (
+        {attendanceStatus !== ATTENDANCE_STATUS.LOADING ? (
           <>
             <Typography>{attendanceMsg()}</Typography>
-            {checkedIn === false && (
-              <CheckInButton handleCheckIn={handleCheckIn} />
-            )}
-            {checkedIn === true && (
-              <CheckOutButton handleCheckOut={handleCheckOut} />
+            {attendanceStatus === ATTENDANCE_STATUS.CHECKED_OUT ? (
+              <WorkerButton
+                buttonType={WORKER_BUTTON_TYPE.CHECK_IN}
+                handleHold={handleCheckIn}
+              />
+            ) : attendanceStatus === ATTENDANCE_STATUS.CHECKED_IN ? (
+              <WorkerButton
+                buttonType={WORKER_BUTTON_TYPE.CHECK_OUT}
+                handleHold={handleCheckOut}
+              />
+            ) : (
+              <Button
+                variant="contained"
+                sx={{
+                  borderRadius: "50%",
+                  width: "160px",
+                  height: "160px",
+                  fontSize: "h5.fontSize",
+                  lineHeight: "1.5",
+                  textTransform: "none",
+                  backgroundColor: "gray",
+                }}
+              >
+                Loading...
+              </Button>
             )}
             <Typography>{gpsStatusMsg()}</Typography>
             <Typography sx={{ alignSelf: "flex-start" }}>

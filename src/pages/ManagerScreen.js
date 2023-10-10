@@ -14,7 +14,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
 import { showCheckOutTime } from "../utils";
-import DB_KEYS from "../constants/dbKeys";
+import DB_KEY from "../constants/dbKey";
 
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
@@ -33,8 +33,8 @@ function ManagerScreen() {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
 
-    const attendanceRef = ref(database, DB_KEYS.CHECK_INS);
-    const profilesRef = ref(database, DB_KEYS.PROFILES);
+    const attendanceRef = ref(database, DB_KEY.CHECK_INS);
+    const profilesRef = ref(database, DB_KEY.PROFILES);
 
     const unsubscribeAttendance = onValue(
       attendanceRef,

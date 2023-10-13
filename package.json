@@ -10,6 +10,7 @@
     "@mui/material": "^5.14.10",
     "@nivo/line": "^0.83.0",
     "@nivo/pie": "^0.83.0",
+    "@nivo/tooltip": "^0.83.0",
     "@turf/distance": "^6.5.0",
     "@turf/helpers": "^6.5.0",
     "d3-scale-chromatic": "^3.0.0",

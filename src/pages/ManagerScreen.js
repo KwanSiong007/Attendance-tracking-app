@@ -129,7 +129,7 @@ function ManagerScreen() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
+          gap: 3,
           mb: 2,
         }}
       >
@@ -152,30 +152,38 @@ function ManagerScreen() {
             >
               <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />
             </Container>
-            <TextField
-              id="outlined-basic"
-              variant="outlined"
-              label="Search by Name"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{ alignSelf: "flex-start" }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 1,
               }}
-            />
-            <ManagerAttendance
-              nowLoaded={nowLoaded}
-              attendance={filteredAttendance}
-              profiles={profiles}
-              page={page}
-              setPage={setPage}
-            />
+            >
+              <TextField
+                id="outlined-basic"
+                variant="outlined"
+                label="Search by Name"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <ManagerAttendance
+                nowLoaded={nowLoaded}
+                attendance={filteredAttendance}
+                profiles={profiles}
+                page={page}
+                setPage={setPage}
+              />
+            </Box>
           </>
         ) : (
           <CircularProgress />

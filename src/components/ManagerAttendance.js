@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Avatar,
   Box,
+  Divider,
   Paper,
   List,
   ListItem,
@@ -142,32 +143,39 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     return (
       <List>
         {attendance.map((row) => (
-          <ListItem key={`${row.userId}_${row.checkInDateTime}`}>
-            <ListItemAvatar>
-              <Avatar
-                src={profiles[row.userId].photoUrl}
-                sx={{ width: 40, height: 40 }}
-                variant="square"
-              ></Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={profiles[row.userId].name}
-              secondary={
-                <>
-                  <div>
-                    @ {row.worksite} on {showDate(row.checkInDateTime)}
-                  </div>
-                  <div>
-                    {showCheckInOutTime(
-                      row.checkInDateTime,
-                      row.checkOutDateTime,
-                      nowLoaded
-                    )}
-                  </div>
-                </>
-              }
-            />
-          </ListItem>
+          <>
+            <ListItem
+              alignItems="flex-start"
+              key={`${row.userId}_${row.checkInDateTime}`}
+              sx={{ py: 0.5 }}
+            >
+              <ListItemAvatar>
+                <Avatar
+                  src={profiles[row.userId].photoUrl}
+                  sx={{ width: 40, height: 40 }}
+                  variant="square"
+                ></Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={profiles[row.userId].name}
+                secondary={
+                  <>
+                    <div>
+                      {showDate(row.checkInDateTime)} @ {row.worksite}
+                    </div>
+                    <div>
+                      {showCheckInOutTime(
+                        row.checkInDateTime,
+                        row.checkOutDateTime,
+                        nowLoaded
+                      )}
+                    </div>
+                  </>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" />
+          </>
         ))}
       </List>
     );

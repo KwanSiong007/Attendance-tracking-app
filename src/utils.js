@@ -46,14 +46,14 @@ const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
 
 const showCheckInOutTime = (checkInIso, checkOutIso, nowLoaded) => {
   const checkInParsed = parseISO(checkInIso);
-  const checkInStr = `In ${format(checkInParsed, "h:mm aa")}`;
+  const checkInStr = `${format(checkInParsed, "h:mm aa")}`;
 
   if (checkOutIso) {
-    return `${checkInStr} / Out ${format(parseISO(checkOutIso), "h:mm aa")}`;
+    return `${checkInStr} \u2013 ${format(parseISO(checkOutIso), "h:mm aa")}`;
   } else if (extractDate(parseISO(checkInIso)) === extractDate(nowLoaded)) {
     return checkInStr;
   } else {
-    return `${checkInStr} / Nil check out`;
+    return `${checkInStr} \u2013 Nil`;
   }
 };
 

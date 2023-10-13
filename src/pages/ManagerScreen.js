@@ -10,6 +10,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -147,7 +148,7 @@ function ManagerScreen() {
               onChange={handleTabChange}
               variant={isMobileScreen ? "fullWidth" : "standard"}
             >
-              {["Log", "Charts"].map((label, index) => (
+              {["Log", "Dashboard"].map((label, index) => (
                 <Tab label={label} key={index} />
               ))}
             </Tabs>
@@ -189,6 +190,9 @@ function ManagerScreen() {
 
             {tab === 1 && (
               <>
+                <Typography variant="h6">
+                  Workers by Current Location
+                </Typography>
                 <Container
                   sx={{
                     height: "300px",
@@ -199,6 +203,7 @@ function ManagerScreen() {
                     countsByWorksite={countsByWorksite}
                   />
                 </Container>
+                <Typography variant="h6">Attendance for Last 7 Days</Typography>
                 <Container
                   sx={{
                     height: attendanceLineHeight,

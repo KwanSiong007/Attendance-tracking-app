@@ -10,11 +10,14 @@ import {
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
 import { showCheckOutTime } from "../utils";
 import DB_KEY from "../constants/dbKey";
+import AttendanceLine from "../components/AttendanceLine";
 
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
@@ -26,8 +29,12 @@ function ManagerScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
-  const [workerCount, setWorkerCount] = useState(null);
-  const [countsByWorksite, setCountsByWorksite] = useState(null);
+  const [workerCount, setWorkerCount] = useState(0);
+  const [countsByWorksite, setCountsByWorksite] = useState({});
+
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
+  const attendanceLineHeight = isMobileScreen ? `calc(5/8 * 100vw)` : "300px";
 
   useEffect(() => {
     const nowLoaded = new Date();
@@ -126,7 +133,7 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && countsByWorksite && profiles ? (
+        {attendance && profiles && workerCount && countsByWorksite ? (
           <>
             <Container
               sx={{
@@ -134,12 +141,16 @@ function ManagerScreen() {
               }}
             >
               <WorksitePie
-                pieData={Object.keys(countsByWorksite).map((worksite) => ({
-                  id: worksite,
-                  label: worksite,
-                  value: countsByWorksite[worksite],
-                }))}
+                workerCount={workerCount}
+                countsByWorksite={countsByWorksite}
               />
+            </Container>
+            <Container
+              sx={{
+                height: attendanceLineHeight,
+              }}
+            >
+              <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />
             </Container>
             <TextField
               id="outlined-basic"
@@ -159,9 +170,9 @@ function ManagerScreen() {
               }}
             />
             <ManagerAttendance
+              nowLoaded={nowLoaded}
               attendance={filteredAttendance}
               profiles={profiles}
-              nowLoaded={nowLoaded}
               page={page}
               setPage={setPage}
             />

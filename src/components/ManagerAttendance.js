@@ -27,7 +27,7 @@ import {
   showTimeDiff,
 } from "../utils";
 
-function ManagerAttendance({ attendance, profiles, nowLoaded, page, setPage }) {
+function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));

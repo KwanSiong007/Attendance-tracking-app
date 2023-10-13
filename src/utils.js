@@ -3,12 +3,18 @@ import {
   parseISO,
   differenceInHours,
   differenceInMinutes,
+  isWithinInterval,
+  startOfDay,
+  subDays,
+  endOfDay,
 } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 import { styled } from "@mui/material/styles";
 
+const TIME_ZONE = "Asia/Singapore";
+
 const extractDate = (dateObj) => {
-  return format(utcToZonedTime(dateObj, "Asia/Singapore"), "yyyy-MM-dd");
+  return format(utcToZonedTime(dateObj, TIME_ZONE), "yyyy-MM-dd");
 };
 
 const buildKey = (userId, dateObj) => {
@@ -24,7 +30,7 @@ const showDate = (isoString, isSmallScreen) => {
 };
 
 const showCurrDate = (dateObj) => {
-  return format(utcToZonedTime(dateObj, "Asia/Singapore"), "EEE, d MMM");
+  return format(utcToZonedTime(dateObj, TIME_ZONE), "EEE, d MMM");
 };
 
 const showCheckInTime = (isoString) => {
@@ -65,6 +71,15 @@ const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
   }
 };
 
+const isWithinLastWeek = (checkInIso, nowLoaded) => {
+  const checkInDate = utcToZonedTime(parseISO(checkInIso), TIME_ZONE);
+  const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
+  const startDate = startOfDay(subDays(dateLoaded, 6));
+  const endDate = endOfDay(dateLoaded);
+
+  return isWithinInterval(checkInDate, { start: startDate, end: endDate });
+};
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -78,11 +93,13 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export {
+  extractDate,
   buildKey,
   showDate,
   showCurrDate,
   showCheckInTime,
   showCheckOutTime,
   showTimeDiff,
+  isWithinLastWeek,
   VisuallyHiddenInput,
 };

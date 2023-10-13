@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   CssBaseline,
   TextField,
@@ -152,32 +153,30 @@ function LogIn() {
 
   // when first load the page, the logic in the useEffect above is executed
   // while the app is checking if the user is logged in, we will display a loading screen
-  if (loading)
-    return (
-      <div>
-        <br />
-        <br />
-        <br />
-        Loading.....
-      </div>
-    );
+  if (loading) return <CircularProgress sx={{ mt: 5 }} />;
 
   // if the user is already signed in, display the below page
   if (isLoggedIn) {
     return (
-      <div>
-        <h1>Welcome, {user.displayName}!</h1>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mt: 4,
+          gap: 2,
+        }}
+      >
+        <Typography variant="h4">Welcome, {user.displayName}!</Typography>
         <ThemeProvider theme={theme}>
           {role === ROLE.WORKER && <WorkerScreen workerId={user.uid} />}
           {role === ROLE.MANAGER && <ManagerScreen />}
           {role === ROLE.ADMIN && <AdminScreen />}
         </ThemeProvider>
-        <div>
-          <Button onClick={handleSignOut} variant="outlined">
-            Sign Out
-          </Button>
-        </div>
-      </div>
+        <Button onClick={handleSignOut} variant="outlined" sx={{ mb: 4 }}>
+          Sign Out
+        </Button>
+      </Box>
     );
   }
 
@@ -190,7 +189,7 @@ function LogIn() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          mt: 5,
+          mt: 4,
           gap: 2,
         }}
       >
@@ -238,14 +237,14 @@ function LogIn() {
             fullWidth
             variant="contained"
             color="primary"
-            sx={{ mt: 3 }}
+            sx={{ mt: 2 }}
           >
             Log In
           </Button>
         </Box>
-        <div>
+        <Typography sx={{ mt: 1 }}>
           Need an account? <Link to="/register">Register</Link>
-        </div>
+        </Typography>
       </Box>
     </Container>
   );

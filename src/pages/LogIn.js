@@ -173,7 +173,7 @@ function LogIn() {
           {role === ROLE.MANAGER && <ManagerScreen />}
           {role === ROLE.ADMIN && <AdminScreen />}
         </ThemeProvider>
-        <Button onClick={handleSignOut} variant="outlined">
+        <Button onClick={handleSignOut} variant="outlined" sx={{ mb: 4 }}>
           Sign Out
         </Button>
       </Box>

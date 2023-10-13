@@ -1,7 +1,7 @@
 import { ResponsivePie } from "@nivo/pie";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { schemeSet1 } from "d3-scale-chromatic";
+import { schemeSet2 } from "d3-scale-chromatic";
 
 function WorksitePie({ pieData }) {
   const theme = useTheme();
@@ -13,7 +13,8 @@ function WorksitePie({ pieData }) {
       if (d.id === "Not at worksite") {
         return "grey";
       } else {
-        return schemeSet1[d.id % schemeSet1.length];
+        const id = pieData.findIndex((p) => p.id === d.id);
+        return schemeSet2[id % schemeSet2.length];
       }
     },
     margin: { top: 25, bottom: 25 },

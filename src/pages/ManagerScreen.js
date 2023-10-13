@@ -26,8 +26,8 @@ function ManagerScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
-  const [workerCount, setWorkerCount] = useState(null);
-  const [countsByWorksite, setCountsByWorksite] = useState(null);
+  const [workerCount, setWorkerCount] = useState(0);
+  const [countsByWorksite, setCountsByWorksite] = useState({});
 
   useEffect(() => {
     const nowLoaded = new Date();
@@ -104,6 +104,16 @@ function ManagerScreen() {
     };
   }, []);
 
+  const countAtWorksite = Object.values(countsByWorksite).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+
+  const countsAllWorkers = {
+    ...countsByWorksite,
+    "Not at worksite": workerCount - countAtWorksite,
+  };
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -126,7 +136,7 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && countsByWorksite && profiles ? (
+        {attendance && countsAllWorkers && profiles ? (
           <>
             <Container
               sx={{
@@ -134,10 +144,10 @@ function ManagerScreen() {
               }}
             >
               <WorksitePie
-                pieData={Object.keys(countsByWorksite).map((worksite) => ({
+                pieData={Object.keys(countsAllWorkers).map((worksite) => ({
                   id: worksite,
                   label: worksite,
-                  value: countsByWorksite[worksite],
+                  value: countsAllWorkers[worksite],
                 }))}
               />
             </Container>

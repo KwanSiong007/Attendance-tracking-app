@@ -300,6 +300,7 @@ function WorkerScreen({ workerId }) {
             ) : (
               <Button
                 variant="contained"
+                disabled
                 sx={{
                   borderRadius: "50%",
                   width: "160px",
@@ -307,7 +308,6 @@ function WorkerScreen({ workerId }) {
                   fontSize: "h5.fontSize",
                   lineHeight: "1.5",
                   textTransform: "none",
-                  backgroundColor: "gray",
                 }}
               >
                 Loading...

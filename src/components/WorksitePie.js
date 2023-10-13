@@ -1,6 +1,7 @@
 import { ResponsivePie } from "@nivo/pie";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { schemeSet1 } from "d3-scale-chromatic";
 
 function WorksitePie({ pieData }) {
   const theme = useTheme();
@@ -8,10 +9,16 @@ function WorksitePie({ pieData }) {
 
   const pieProps = {
     data: pieData,
+    colors: (d) => {
+      if (d.id === "Not at worksite") {
+        return "grey";
+      } else {
+        return schemeSet1[d.id % schemeSet1.length];
+      }
+    },
     margin: { top: 25, bottom: 25 },
     innerRadius: 0.5,
     cornerRadius: 5,
-    colors: { scheme: "set1" },
     theme: {
       labels: {
         text: {

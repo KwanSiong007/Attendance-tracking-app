@@ -18,7 +18,23 @@ function CustomTooltip({ datum }) {
   );
 }
 
-function WorksitePie({ pieData }) {
+function WorksitePie({ workerCount, countsByWorksite }) {
+  const countAtWorksite = Object.values(countsByWorksite).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+
+  const countsAllWorkers = {
+    ...countsByWorksite,
+    "Not at worksite": workerCount - countAtWorksite,
+  };
+
+  const pieData = Object.keys(countsAllWorkers).map((worksite) => ({
+    id: worksite,
+    label: worksite,
+    value: countsAllWorkers[worksite],
+  }));
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 

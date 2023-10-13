@@ -13,7 +13,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
-import { extractDate, isWithinLastWeek, showCheckOutTime } from "../utils";
+import { showCheckOutTime } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import AttendanceLine from "../components/AttendanceLine";
 
@@ -105,28 +105,6 @@ function ManagerScreen() {
     };
   }, []);
 
-  const workersLastWeek = Object.values(attendance).reduce((acc, row) => {
-    if (isWithinLastWeek(row.checkInDateTime, nowLoaded)) {
-      const dateLoaded = extractDate(row.checkInDateTime);
-      acc[dateLoaded] = (acc[dateLoaded] || new Set()).add(row.userId);
-    }
-    return acc;
-  }, {});
-
-  const attendanceLastWeek = Object.fromEntries(
-    Object.entries(workersLastWeek).map(([date, users]) => [date, users.size])
-  );
-
-  const countAtWorksite = Object.values(countsByWorksite).reduce(
-    (sum, count) => sum + count,
-    0
-  );
-
-  const countsAllWorkers = {
-    ...countsByWorksite,
-    "Not at worksite": workerCount - countAtWorksite,
-  };
-
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -149,7 +127,7 @@ function ManagerScreen() {
           mb: 2,
         }}
       >
-        {attendance && countsAllWorkers && profiles ? (
+        {attendance && profiles && workerCount && countsByWorksite ? (
           <>
             <Container
               sx={{
@@ -157,11 +135,8 @@ function ManagerScreen() {
               }}
             >
               <WorksitePie
-                pieData={Object.keys(countsAllWorkers).map((worksite) => ({
-                  id: worksite,
-                  label: worksite,
-                  value: countsAllWorkers[worksite],
-                }))}
+                workerCount={workerCount}
+                countsByWorksite={countsByWorksite}
               />
             </Container>
             <Container
@@ -169,17 +144,7 @@ function ManagerScreen() {
                 height: "300px",
               }}
             >
-              <AttendanceLine
-                lineData={[
-                  {
-                    id: "attendance",
-                    data: Object.entries(attendanceLastWeek).map(([x, y]) => ({
-                      x,
-                      y,
-                    })),
-                  },
-                ]}
-              />
+              <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />
             </Container>
             <TextField
               id="outlined-basic"
@@ -199,9 +164,9 @@ function ManagerScreen() {
               }}
             />
             <ManagerAttendance
+              nowLoaded={nowLoaded}
               attendance={filteredAttendance}
               profiles={profiles}
-              nowLoaded={nowLoaded}
               page={page}
               setPage={setPage}
             />

@@ -151,56 +151,66 @@ function ManagerScreen() {
                 <Tab label={label} key={index} />
               ))}
             </Tabs>
-            {}
-            <Container
-              sx={{
-                height: "300px",
-              }}
-            >
-              <WorksitePie
-                workerCount={workerCount}
-                countsByWorksite={countsByWorksite}
-              />
-            </Container>
-            <Container
-              sx={{
-                height: attendanceLineHeight,
-              }}
-            >
-              <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />
-            </Container>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 1,
-              }}
-            >
-              <TextField
-                id="outlined-basic"
-                variant="outlined"
-                label="Search by Name"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+
+            {tab === 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: 1,
                 }}
-              />
-              <ManagerAttendance
-                nowLoaded={nowLoaded}
-                attendance={filteredAttendance}
-                profiles={profiles}
-                page={page}
-                setPage={setPage}
-              />
-            </Box>
+              >
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  label="Search by Name"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton>
+                          <SearchIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <ManagerAttendance
+                  nowLoaded={nowLoaded}
+                  attendance={filteredAttendance}
+                  profiles={profiles}
+                  page={page}
+                  setPage={setPage}
+                />
+              </Box>
+            )}
+
+            {tab === 1 && (
+              <>
+                <Container
+                  sx={{
+                    height: "300px",
+                  }}
+                >
+                  <WorksitePie
+                    workerCount={workerCount}
+                    countsByWorksite={countsByWorksite}
+                  />
+                </Container>
+                <Container
+                  sx={{
+                    height: attendanceLineHeight,
+                  }}
+                >
+                  <AttendanceLine
+                    nowLoaded={nowLoaded}
+                    attendance={attendance}
+                  />
+                </Container>
+              </>
+            )}
           </>
         ) : (
           <CircularProgress />

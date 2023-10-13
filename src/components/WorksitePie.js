@@ -24,8 +24,12 @@ function WorksitePie({ workerCount, countsByWorksite }) {
     0
   );
 
+  const sortedCountsByWorksite = Object.fromEntries(
+    Object.entries(countsByWorksite).sort((a, b) => b[1] - a[1])
+  );
+
   const countsAllWorkers = {
-    ...countsByWorksite,
+    ...sortedCountsByWorksite,
     "Not at worksite": workerCount - countAtWorksite,
   };
 

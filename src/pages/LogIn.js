@@ -149,6 +149,7 @@ function LogIn() {
     setIsLoggedIn(false);
     setUser({});
     setRole("");
+    setError("");
   };
 
   // when first load the page, the logic in the useEffect above is executed

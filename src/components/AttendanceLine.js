@@ -5,7 +5,11 @@ import { format } from "date-fns";
 function CustomTooltip({ point }) {
   const { x, y } = point.data;
   const xLabel = format(new Date(x), "EEE, d MMM");
-  return <BasicTooltip id={xLabel} value={y} color={point.color} enableChip />;
+  return (
+    <div className="nivoTooltip">
+      <BasicTooltip id={xLabel} value={y} color={point.color} enableChip />
+    </div>
+  );
 }
 
 function AttendanceLine({ lineData }) {
@@ -46,11 +50,6 @@ function AttendanceLine({ lineData }) {
           text: {
             fontSize: "0.875rem",
             fontWeight: "bold",
-          },
-        },
-        tooltip: {
-          container: {
-            fontSize: "0.875rem",
           },
         },
       },

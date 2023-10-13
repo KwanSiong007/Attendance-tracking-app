@@ -1,7 +1,22 @@
 import { ResponsivePie } from "@nivo/pie";
+import { BasicTooltip } from "@nivo/tooltip";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { schemeSet2 } from "d3-scale-chromatic";
+
+function CustomTooltip({ datum }) {
+  const data = datum.data;
+  return (
+    <div className="nivoTooltip">
+      <BasicTooltip
+        id={data.id}
+        value={data.value}
+        color={datum.color}
+        enableChip
+      />
+    </div>
+  );
+}
 
 function WorksitePie({ pieData }) {
   const theme = useTheme();
@@ -9,6 +24,7 @@ function WorksitePie({ pieData }) {
 
   const pieProps = {
     data: pieData,
+    tooltip: CustomTooltip,
     colors: (d) => {
       if (d.id === "Not at worksite") {
         return "grey";

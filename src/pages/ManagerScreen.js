@@ -15,6 +15,7 @@ import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
 import { extractDate, isWithinLastWeek, showCheckOutTime } from "../utils";
 import DB_KEY from "../constants/dbKey";
+import AttendanceLine from "../components/AttendanceLine";
 
 function ManagerScreen() {
   const [nowLoaded, setNowLoaded] = useState(null);
@@ -116,9 +117,6 @@ function ManagerScreen() {
     Object.entries(workersLastWeek).map(([date, users]) => [date, users.size])
   );
 
-  // TODO: Remove this
-  console.log(attendanceLastWeek);
-
   const countAtWorksite = Object.values(countsByWorksite).reduce(
     (sum, count) => sum + count,
     0
@@ -164,6 +162,23 @@ function ManagerScreen() {
                   label: worksite,
                   value: countsAllWorkers[worksite],
                 }))}
+              />
+            </Container>
+            <Container
+              sx={{
+                height: "300px",
+              }}
+            >
+              <AttendanceLine
+                lineData={[
+                  {
+                    id: "attendance",
+                    data: Object.entries(attendanceLastWeek).map(([x, y]) => ({
+                      x,
+                      y,
+                    })),
+                  },
+                ]}
               />
             </Container>
             <TextField

@@ -13,7 +13,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
-import { showCheckOutTime } from "../utils";
+import { extractDate, isWithinLastWeek, showCheckOutTime } from "../utils";
 import DB_KEY from "../constants/dbKey";
 
 function ManagerScreen() {
@@ -103,6 +103,21 @@ function ManagerScreen() {
       unsubscribeProfiles();
     };
   }, []);
+
+  const workersLastWeek = Object.values(attendance).reduce((acc, row) => {
+    if (isWithinLastWeek(row.checkInDateTime, nowLoaded)) {
+      const dateLoaded = extractDate(row.checkInDateTime);
+      acc[dateLoaded] = (acc[dateLoaded] || new Set()).add(row.userId);
+    }
+    return acc;
+  }, {});
+
+  const attendanceLastWeek = Object.fromEntries(
+    Object.entries(workersLastWeek).map(([date, users]) => [date, users.size])
+  );
+
+  // TODO: Remove this
+  console.log(attendanceLastWeek);
 
   const countAtWorksite = Object.values(countsByWorksite).reduce(
     (sum, count) => sum + count,

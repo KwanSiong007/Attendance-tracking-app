@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -143,12 +143,8 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     return (
       <List>
         {attendance.map((row) => (
-          <>
-            <ListItem
-              alignItems="flex-start"
-              key={`${row.userId}_${row.checkInDateTime}`}
-              sx={{ py: 0.5 }}
-            >
+          <React.Fragment key={`${row.userId}_${row.checkInDateTime}`}>
+            <ListItem alignItems="flex-start" sx={{ py: 0.5 }}>
               <ListItemAvatar>
                 <Avatar
                   src={profiles[row.userId].photoUrl}
@@ -158,24 +154,32 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
               </ListItemAvatar>
               <ListItemText
                 primary={profiles[row.userId].name}
-                secondary={
-                  <>
-                    <div>
-                      {showDate(row.checkInDateTime)} @ {row.worksite}
-                    </div>
-                    <div>
-                      {showCheckInOutTime(
-                        row.checkInDateTime,
-                        row.checkOutDateTime,
-                        nowLoaded
-                      )}
-                    </div>
-                  </>
-                }
+                secondary={[
+                  <Typography
+                    key="line1"
+                    component="span"
+                    display="block"
+                    variant="body2"
+                  >
+                    {showDate(row.checkInDateTime)} @ {row.worksite}
+                  </Typography>,
+                  <Typography
+                    key="line2"
+                    component="span"
+                    display="block"
+                    variant="body2"
+                  >
+                    {showCheckInOutTime(
+                      row.checkInDateTime,
+                      row.checkOutDateTime,
+                      nowLoaded
+                    )}
+                  </Typography>,
+                ]}
               />
             </ListItem>
             <Divider variant="inset" />
-          </>
+          </React.Fragment>
         ))}
       </List>
     );

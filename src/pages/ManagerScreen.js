@@ -7,6 +7,8 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  Tab,
+  Tabs,
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,6 +26,7 @@ function ManagerScreen() {
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
+  const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,6 +114,10 @@ function ManagerScreen() {
     };
   }, []);
 
+  const handleTabChange = (e, newTab) => {
+    setTab(newTab);
+  };
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -135,6 +142,16 @@ function ManagerScreen() {
       >
         {attendance && profiles && workerCount && countsByWorksite ? (
           <>
+            <Tabs
+              value={tab}
+              onChange={handleTabChange}
+              variant={isMobileScreen ? "fullWidth" : "standard"}
+            >
+              {["Log", "Charts"].map((label, index) => (
+                <Tab label={label} key={index} />
+              ))}
+            </Tabs>
+            {}
             <Container
               sx={{
                 height: "300px",
@@ -156,7 +173,7 @@ function ManagerScreen() {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "flex-start",
                 gap: 1,
               }}
             >

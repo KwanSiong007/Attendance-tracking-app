@@ -5,9 +5,10 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  TableFooter,
-  TablePagination,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+
 import {
   showDate,
   showCheckInTime,
@@ -15,53 +16,47 @@ import {
   showTimeDiff,
 } from "../utils";
 
-const ROWS_PER_PAGE = 10;
-
 function WorkerAttendance({ attendance, nowLoaded }) {
-  const [page, setPage] = useState(0);
-
-  const handleChangePage = (e, newPage) => {
-    setPage(newPage);
-  };
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
 
   return (
     <Table>
       <TableHead>
         <TableRow>
-          {[
-            "Date",
-            "Work Site",
-            "Check In Time",
-            "Check Out Time",
-            "Duration Worked",
-          ].map((headCell) => (
-            <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
-              {headCell}
+          {["Date", "Work Site", "Check In Time", "Check Out Time"].map(
+            (headCell) => (
+              <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
+                {headCell}
+              </TableCell>
+            )
+          )}
+          {!isMobileScreen && (
+            <TableCell key="Duration Worked" sx={{ fontWeight: "bold" }}>
+              Duration Worked
             </TableCell>
-          ))}
+          )}
         </TableRow>
       </TableHead>
       <TableBody>
-        {attendance
-          .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
-          .map((row, index) => (
-            <TableRow
-              key={`${row.userId}_${row.checkInDateTime}`}
-              sx={{
-                backgroundColor:
-                  index % 2 === 1 ? "transparent" : "action.hover",
-              }}
-            >
-              <TableCell>{showDate(row.checkInDateTime)}</TableCell>
-              <TableCell>{row.worksite}</TableCell>
-              <TableCell>{showCheckInTime(row.checkInDateTime)}</TableCell>
-              <TableCell>
-                {showCheckOutTime(
-                  row.checkInDateTime,
-                  row.checkOutDateTime,
-                  nowLoaded
-                )}
-              </TableCell>
+        {attendance.map((row, index) => (
+          <TableRow
+            key={`${row.userId}_${row.checkInDateTime}`}
+            sx={{
+              backgroundColor: index % 2 === 1 ? "transparent" : "action.hover",
+            }}
+          >
+            <TableCell>{showDate(row.checkInDateTime)}</TableCell>
+            <TableCell>{row.worksite}</TableCell>
+            <TableCell>{showCheckInTime(row.checkInDateTime)}</TableCell>
+            <TableCell>
+              {showCheckOutTime(
+                row.checkInDateTime,
+                row.checkOutDateTime,
+                nowLoaded
+              )}
+            </TableCell>
+            {!isMobileScreen && (
               <TableCell>
                 {showTimeDiff(
                   row.checkInDateTime,
@@ -69,21 +64,10 @@ function WorkerAttendance({ attendance, nowLoaded }) {
                   nowLoaded
                 )}
               </TableCell>
-            </TableRow>
-          ))}
+            )}
+          </TableRow>
+        ))}
       </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TablePagination
-            rowsPerPageOptions={[]}
-            colSpan={5}
-            count={attendance.length}
-            rowsPerPage={ROWS_PER_PAGE}
-            page={page}
-            onPageChange={handleChangePage}
-          />
-        </TableRow>
-      </TableFooter>
     </Table>
   );
 }

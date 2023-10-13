@@ -40,7 +40,7 @@ function AttendanceLine({ nowLoaded, attendance }) {
   const lineProps = {
     data: lineData,
     tooltip: CustomTooltip,
-    margin: { top: 25, bottom: 25, left: 50, right: 50 },
+    margin: { top: 25, bottom: 25, left: 40, right: 25 },
     xScale: { type: "time", format: "%Y-%m-%d" },
     xFormat: "time:%Y-%m-%d",
     yScale: {

@@ -10,6 +10,8 @@ import {
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
@@ -29,6 +31,10 @@ function ManagerScreen() {
 
   const [workerCount, setWorkerCount] = useState(0);
   const [countsByWorksite, setCountsByWorksite] = useState({});
+
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
+  const attendanceLineHeight = isMobileScreen ? `calc(5/8 * 100vw)` : "300px";
 
   useEffect(() => {
     const nowLoaded = new Date();
@@ -141,7 +147,7 @@ function ManagerScreen() {
             </Container>
             <Container
               sx={{
-                height: "300px",
+                height: attendanceLineHeight,
               }}
             >
               <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />

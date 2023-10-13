@@ -24,6 +24,7 @@ import {
   showDate,
   showCheckInTime,
   showCheckOutTime,
+  showCheckInOutTime,
   showTimeDiff,
 } from "../utils";
 
@@ -31,7 +32,6 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleChangePage = (e, newPage) => {
@@ -78,9 +78,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
                       index % 2 === 1 ? "transparent" : "action.hover",
                   }}
                 >
-                  <TableCell>
-                    {showDate(row.checkInDateTime, isSmallScreen)}
-                  </TableCell>
+                  <TableCell>{showDate(row.checkInDateTime)}</TableCell>
                   <TableCell>
                     <Box
                       sx={{
@@ -153,8 +151,21 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
               ></Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={row.worksite}
-              secondary={showCheckInTime(row.checkInDateTime)}
+              primary={profiles[row.userId].name}
+              secondary={
+                <>
+                  <div>
+                    @ {row.worksite} on {showDate(row.checkInDateTime)}
+                  </div>
+                  <div>
+                    {showCheckInOutTime(
+                      row.checkInDateTime,
+                      row.checkOutDateTime,
+                      nowLoaded
+                    )}
+                  </div>
+                </>
+              }
             />
           </ListItem>
         ))}

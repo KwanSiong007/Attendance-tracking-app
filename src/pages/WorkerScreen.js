@@ -208,9 +208,12 @@ function WorkerScreen({ workerId }) {
       const site = await locateWorker();
       if (site) {
         writeCheckIn(site);
+      } else {
+        setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_OUT);
       }
     } catch (error) {
       console.error(`Location retrieval failed: ${error.message}`);
+      setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_OUT);
     }
   };
 
@@ -229,9 +232,12 @@ function WorkerScreen({ workerId }) {
       const site = await locateWorker();
       if (site?.name === checkedInSite) {
         writeCheckOut();
+      } else {
+        setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_IN);
       }
     } catch (error) {
       console.error(`Location retrieval failed: ${error.message}`);
+      setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_IN);
     }
   };
 

@@ -57,6 +57,7 @@ function LogIn() {
   const [role, setRole] = useState("");
   //The loading state is used to indicate whether the authentication check is still in progress.
   const [loading, setLoading] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -112,6 +113,7 @@ function LogIn() {
   }, [user]);
 
   const signInUser = async () => {
+    setLoggingIn(true);
     try {
       const user = await signIn(state.email, state.password);
 
@@ -128,12 +130,14 @@ function LogIn() {
         email: "",
         password: "",
       });
+      setLoggingIn(false);
     } catch (error) {
       if (error.code === "auth/invalid-login-credentials") {
         setError("Invalid email or password.");
       } else {
         console.error(error);
       }
+      setLoggingIn(false);
     }
   };
 
@@ -234,15 +238,19 @@ function LogIn() {
             onChange={(e) => handleChange(e)}
           />
           {error && <div style={{ color: "red" }}>{error}</div>}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-          >
-            Log In
-          </Button>
+          {loggingIn ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+            >
+              Log In
+            </Button>
+          )}
         </Box>
         <Typography sx={{ mt: 1 }}>
           Need an account? <Link to="/register">Register</Link>

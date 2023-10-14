@@ -67,7 +67,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     return (
       <>
         <TablePagination
-          component={Paper}
+          component="div"
           rowsPerPageOptions={[10, 25, 50]}
           count={attendance.length}
           rowsPerPage={rowsPerPage}
@@ -80,6 +80,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
           }}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{ width: "100%" }}
         />
         <TableContainer
           component={Paper}

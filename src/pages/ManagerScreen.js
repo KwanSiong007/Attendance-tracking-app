@@ -208,27 +208,60 @@ function ManagerScreen() {
                   width: "100%",
                 }}
               >
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  label="Search by Name"
-                  value={nameQuery}
-                  onChange={handleNameQueryChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { mobile: "row", xs: "column" },
+                    gap: { mobile: 3, xs: 2 },
+                    width: { mobile: "auto", xs: "100%" },
                   }}
-                />
-                <DateRangePicker
-                  onChange={handleDateRangeChange}
-                  value={dateRange}
-                  formatMonthYear={formatMonthYear}
-                />
+                >
+                  <TextField
+                    variant="outlined"
+                    label="Worker Name"
+                    value={nameQuery}
+                    onChange={handleNameQueryChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton>
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      maxWidth: "330px",
+                      "& .MuiOutlinedInput-root": {
+                        paddingRight: 0,
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        height: "50px",
+                        paddingBlock: 0,
+                        fontSize: "0.875rem",
+                      },
+                      "& .MuiInputLabel-outlined": {
+                        transition:
+                          "transform 200ms cubic-bezier(0, 0, 0.2, 1), top 200ms cubic-bezier(0, 0, 0.2, 1), font-size 200ms cubic-bezier(0, 0, 0.2, 1)",
+                        "&:not(.MuiInputLabel-shrink)": {
+                          fontSize: "0.875rem",
+                          top: "50%",
+                          transform: "translate(0.875rem, -50%)",
+                        },
+                        "&.MuiInputLabel-shrink": {
+                          top: 0,
+                          transform:
+                            "translate(0.875rem, 0) scale(0.75) transform(0, -50%)",
+                        },
+                      },
+                    }}
+                  />
+                  <DateRangePicker
+                    onChange={handleDateRangeChange}
+                    value={dateRange}
+                    formatMonthYear={formatMonthYear}
+                  />
+                </Box>
                 <ManagerAttendance
                   nowLoaded={nowLoaded}
                   attendance={filteredAttendance}

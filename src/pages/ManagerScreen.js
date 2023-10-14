@@ -151,6 +151,10 @@ function ManagerScreen() {
   };
 
   const handleDateRangeChange = (newDateRange) => {
+    if (!newDateRange) {
+      setSelectedDateRange([firstDayOfMonth, new Date()]);
+      return;
+    }
     setSelectedDateRange(newDateRange);
     const [startDate, endDate] = newDateRange;
     const filtered = filterAttendanceByDateRange(startDate, endDate);

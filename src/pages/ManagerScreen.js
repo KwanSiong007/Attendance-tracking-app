@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
+
 import {
   Box,
   CircularProgress,
@@ -15,9 +16,12 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+
 import DateRangePicker from "@wojtekmaj/react-daterange-picker";
-import "@wojtekmaj/react-daterange-picker/dist/DateRangePicker.css";
-import "react-calendar/dist/Calendar.css";
+
+import "../styles/DateRangePicker.css";
+import "../styles/Calendar.css";
+import { format } from "date-fns";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
@@ -161,6 +165,10 @@ function ManagerScreen() {
     setFilteredAttendance(filtered);
   };
 
+  const formatMonthYear = (locale, date) => {
+    return format(date, "MMM yyyy");
+  };
+
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -212,6 +220,7 @@ function ManagerScreen() {
                 <DateRangePicker
                   onChange={handleDateRangeChange}
                   value={selectedDateRange}
+                  formatMonthYear={formatMonthYear}
                 />
                 <ManagerAttendance
                   nowLoaded={nowLoaded}

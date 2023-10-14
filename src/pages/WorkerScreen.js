@@ -61,6 +61,7 @@ function WorkerScreen({ workerId }) {
     const nowLoaded = new Date();
     setNowLoaded(nowLoaded);
     const searchKey = buildKey(workerId, nowLoaded);
+    console.log(searchKey);
     setCurrDate(showCurrDate(nowLoaded));
     const recordsRef = ref(database, DB_KEY.CHECK_INS);
     const q = query(recordsRef, orderByChild("checkInKey"), equalTo(searchKey));

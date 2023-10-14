@@ -68,9 +68,10 @@ function AdminScreen() {
             new Date(d.setHours(13, 0, 0, 0))
           );
           dummyCheckIns.push({
-            checkInDateTime: checkIn.toISOString(),
-            checkOutDateTime: checkOut.toISOString(),
             userId: userId,
+            checkInDateTime: checkIn.toISOString(),
+            checkInKey: buildKey(userId, new Date()),
+            checkOutDateTime: checkOut.toISOString(),
             worksite: worksite,
           });
           checkIn = getRandomTime(

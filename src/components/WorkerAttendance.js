@@ -16,6 +16,7 @@ import {
 } from "../utils";
 
 function WorkerAttendance({ attendance, nowLoaded }) {
+  console.log(attendance);
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
 

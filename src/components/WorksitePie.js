@@ -7,7 +7,7 @@ import { schemeSet2 } from "d3-scale-chromatic";
 function CustomTooltip({ datum }) {
   const data = datum.data;
   return (
-    <div className="nivoTooltip">
+    <div className="nivo-tooltip">
       <BasicTooltip
         id={data.id}
         value={data.value}

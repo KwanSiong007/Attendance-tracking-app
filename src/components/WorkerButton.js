@@ -11,7 +11,7 @@ function WorkerButton({ buttonType, handleHold }) {
 
   const handleStart = () => {
     setHolding(true);
-    document.body.classList.add("noSelect");
+    document.body.classList.add("no-select");
 
     const startTime = Date.now();
 
@@ -27,7 +27,7 @@ function WorkerButton({ buttonType, handleHold }) {
 
     const handleEnd = () => {
       setHolding(false);
-      document.body.classList.remove("noSelect");
+      document.body.classList.remove("no-select");
 
       clearInterval(intervalId);
       window.removeEventListener("mouseup", handleEnd);

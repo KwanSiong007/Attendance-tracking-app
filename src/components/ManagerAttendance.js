@@ -128,6 +128,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
                 page={page}
                 SelectProps={{
                   inputProps: {
+                    id: "rows-per-page",
                     "aria-label": "rows per page",
                   },
                 }}

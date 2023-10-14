@@ -8,7 +8,7 @@ function CustomTooltip({ point }) {
   const { x, y } = point.data;
   const xLabel = format(new Date(x), "EEE, d MMM");
   return (
-    <div className="nivoTooltip">
+    <div className="nivo-tooltip">
       <BasicTooltip id={xLabel} value={y} color={point.color} enableChip />
     </div>
   );

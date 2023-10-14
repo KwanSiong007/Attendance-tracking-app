@@ -9,14 +9,14 @@ code {
     monospace;
 }
 
-.noSelect {
+.no-select {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-.nivoTooltip {
+.nivo-tooltip {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   font-size: 0.875rem;
 }

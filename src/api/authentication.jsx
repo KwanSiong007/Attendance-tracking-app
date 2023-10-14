@@ -57,6 +57,7 @@ export const signIn = async (email, password) => {
     const errorMessage = error.message;
     console.log(`Error at signIn
     : ${errorCode} ${errorMessage}`);
+    throw error;
   }
 };
 

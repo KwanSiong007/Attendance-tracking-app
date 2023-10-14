@@ -112,9 +112,9 @@ function LogIn() {
   }, [user]);
 
   const signInUser = async () => {
-    const user = await signIn(state.email, state.password);
+    try {
+      const user = await signIn(state.email, state.password);
 
-    if (user) {
       const logIn = {
         userId: user.uid,
         logInDateTime: new Date().toISOString(),
@@ -122,17 +122,18 @@ function LogIn() {
       const logInsRef = ref(database, DB_KEY.LOG_INS);
       const newLogInRef = push(logInsRef);
       set(newLogInRef, logIn);
-      // console.log("logIn", logIn);
 
       setIsLoggedIn(true);
       setState({
         email: "",
         password: "",
       });
-    } else {
-      setError(
-        "The email or password you entered is incorrect. Please try again."
-      );
+    } catch (error) {
+      if (error.code === "auth/invalid-login-credentials") {
+        setError("Invalid email or password.");
+      } else {
+        console.error(error);
+      }
     }
   };
 

@@ -2,6 +2,7 @@ import { get, push, ref } from "firebase/database";
 import { database } from "../firebase";
 import { Box, Button } from "@mui/material";
 
+import { buildKey } from "../utils";
 import DB_KEY from "../constants/dbKey";
 
 function AdminScreen() {
@@ -83,9 +84,10 @@ function AdminScreen() {
         }
 
         dummyCheckIns.push({
-          checkInDateTime: checkIn.toISOString(),
-          checkOutDateTime: checkOut ? checkOut.toISOString() : null,
           userId: userId,
+          checkInDateTime: checkIn.toISOString(),
+          checkInKey: buildKey(userId, new Date()),
+          checkOutDateTime: checkOut ? checkOut.toISOString() : null,
           worksite: worksite,
         });
       });

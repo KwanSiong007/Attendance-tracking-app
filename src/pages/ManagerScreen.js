@@ -15,6 +15,9 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import DateRangePicker from "@wojtekmaj/react-daterange-picker";
+import "@wojtekmaj/react-daterange-picker/dist/DateRangePicker.css";
+import "react-calendar/dist/Calendar.css";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
@@ -35,6 +38,16 @@ function ManagerScreen() {
 
   const [workerCount, setWorkerCount] = useState(0);
   const [countsByWorksite, setCountsByWorksite] = useState({});
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  );
+  const [selectedDateRange, setSelectedDateRange] = useState([
+    firstDayOfMonth,
+    new Date(),
+  ]);
 
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
@@ -130,6 +143,20 @@ function ManagerScreen() {
     setFilteredAttendance(filteredAttendance);
   };
 
+  const filterAttendanceByDateRange = (startDate, endDate) => {
+    return attendance.filter((row) => {
+      const checkInDateTime = new Date(row.checkInDateTime);
+      return checkInDateTime >= startDate && checkInDateTime <= endDate;
+    });
+  };
+
+  const handleDateRangeChange = (newDateRange) => {
+    setSelectedDateRange(newDateRange);
+    const [startDate, endDate] = newDateRange;
+    const filtered = filterAttendanceByDateRange(startDate, endDate);
+    setFilteredAttendance(filtered);
+  };
+
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -177,6 +204,10 @@ function ManagerScreen() {
                       </InputAdornment>
                     ),
                   }}
+                />
+                <DateRangePicker
+                  onChange={handleDateRangeChange}
+                  value={selectedDateRange}
                 />
                 <ManagerAttendance
                   nowLoaded={nowLoaded}

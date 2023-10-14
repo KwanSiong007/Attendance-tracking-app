@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
 
@@ -37,7 +37,7 @@ function ManagerScreen() {
   const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [nameQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
   const [workerCount, setWorkerCount] = useState(0);
@@ -133,22 +133,34 @@ function ManagerScreen() {
     setTab(newTab);
   };
 
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    const filteredAttendance = attendance.filter((row) =>
-      profiles[row.userId].name.toLowerCase().includes(query.toLowerCase())
-    );
+  const handleFilterChange = useCallback(() => {
+    let filtered = [...attendance];
+
+    if (nameQuery) {
+      filtered = filtered.filter((row) =>
+        profiles[row.userId].name
+          .toLowerCase()
+          .includes(nameQuery.toLowerCase())
+      );
+    }
+
+    const [startDate, endDate] = dateRange;
+
+    filtered = filtered.filter((row) => {
+      const checkInDateTime = new Date(row.checkInDateTime);
+      return checkInDateTime >= startDate && checkInDateTime < endDate;
+    });
 
     setPage(0);
-    setFilteredAttendance(filteredAttendance);
-  };
+    setFilteredAttendance(filtered);
+  }, [attendance, profiles, nameQuery, dateRange]);
 
-  const filterAttendanceByDateRange = (startDate, endDate) => {
-    return attendance.filter((row) => {
-      const checkInDateTime = new Date(row.checkInDateTime);
-      return checkInDateTime >= startDate && checkInDateTime <= endDate;
-    });
+  useEffect(() => {
+    handleFilterChange();
+  }, [nameQuery, dateRange, handleFilterChange]);
+
+  const handleNameQueryChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   const handleDateRangeChange = (dateRange) => {
@@ -157,9 +169,6 @@ function ManagerScreen() {
       return;
     }
     setDateRange(dateRange);
-    const [startDate, endDate] = dateRange;
-    const filtered = filterAttendanceByDateRange(startDate, endDate);
-    setFilteredAttendance(filtered);
   };
 
   const formatMonthYear = (locale, date) => {
@@ -203,8 +212,8 @@ function ManagerScreen() {
                   id="outlined-basic"
                   variant="outlined"
                   label="Search by Name"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
+                  value={nameQuery}
+                  onChange={handleNameQueryChange}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">

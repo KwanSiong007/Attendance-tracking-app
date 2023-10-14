@@ -14,7 +14,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TableFooter,
   TablePagination,
   Typography,
   CircularProgress,
@@ -68,6 +67,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     return (
       <>
         <TablePagination
+          component={Paper}
           rowsPerPageOptions={[10, 25, 50]}
           count={attendance.length}
           rowsPerPage={rowsPerPage}

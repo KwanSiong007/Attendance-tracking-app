@@ -7,11 +7,7 @@ import { extractDate, isWithinLastWeek } from "../utils";
 function CustomTooltip({ point }) {
   const { x, y } = point.data;
   const xLabel = format(new Date(x), "EEE, d MMM");
-  return (
-    <div className="nivo-tooltip">
-      <BasicTooltip id={xLabel} value={y} color={point.color} enableChip />
-    </div>
-  );
+  return <BasicTooltip id={xLabel} value={y} color={point.color} enableChip />;
 }
 
 function AttendanceLine({ nowLoaded, attendance }) {

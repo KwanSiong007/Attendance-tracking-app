@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/Attendance-tracking-app/static/css/main.19a57880.css",
-    "main.js": "/Attendance-tracking-app/static/js/main.58b4eb5f.js",
+    "main.css": "/Attendance-tracking-app/static/css/main.147ee725.css",
+    "main.js": "/Attendance-tracking-app/static/js/main.2398ae74.js",
     "index.html": "/Attendance-tracking-app/index.html",
-    "main.19a57880.css.map": "/Attendance-tracking-app/static/css/main.19a57880.css.map",
-    "main.58b4eb5f.js.map": "/Attendance-tracking-app/static/js/main.58b4eb5f.js.map"
+    "main.147ee725.css.map": "/Attendance-tracking-app/static/css/main.147ee725.css.map",
+    "main.2398ae74.js.map": "/Attendance-tracking-app/static/js/main.2398ae74.js.map"
   },
   "entrypoints": [
-    "static/css/main.19a57880.css",
-    "static/js/main.58b4eb5f.js"
+    "static/css/main.147ee725.css",
+    "static/js/main.2398ae74.js"
   ]
 }

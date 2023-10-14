@@ -70,7 +70,7 @@ function AdminScreen() {
           dummyCheckIns.push({
             userId: userId,
             checkInDateTime: checkIn.toISOString(),
-            checkInKey: buildKey(userId, new Date()),
+            checkInKey: buildKey(userId, checkIn),
             checkOutDateTime: checkOut.toISOString(),
             worksite: worksite,
           });
@@ -87,7 +87,7 @@ function AdminScreen() {
         dummyCheckIns.push({
           userId: userId,
           checkInDateTime: checkIn.toISOString(),
-          checkInKey: buildKey(userId, new Date()),
+          checkInKey: buildKey(userId, checkIn),
           checkOutDateTime: checkOut ? checkOut.toISOString() : null,
           worksite: worksite,
         });

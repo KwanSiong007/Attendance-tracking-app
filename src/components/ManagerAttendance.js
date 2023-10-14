@@ -170,7 +170,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
         hasMore={hasMore}
         loader={<CircularProgress />}
         endMessage={<Typography>No more records</Typography>}
-        scrollThreshold={1}
+        scrollThreshold={"200px"}
         style={{ overflow: "hidden" }}
       >
         <List>

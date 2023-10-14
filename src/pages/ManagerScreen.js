@@ -48,10 +48,7 @@ function ManagerScreen() {
     currentDate.getMonth(),
     1
   );
-  const [selectedDateRange, setSelectedDateRange] = useState([
-    firstDayOfMonth,
-    new Date(),
-  ]);
+  const [dateRange, setDateRange] = useState([firstDayOfMonth, new Date()]);
 
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
@@ -154,13 +151,13 @@ function ManagerScreen() {
     });
   };
 
-  const handleDateRangeChange = (newDateRange) => {
-    if (!newDateRange) {
-      setSelectedDateRange([firstDayOfMonth, new Date()]);
+  const handleDateRangeChange = (dateRange) => {
+    if (!dateRange) {
+      setDateRange([firstDayOfMonth, new Date()]);
       return;
     }
-    setSelectedDateRange(newDateRange);
-    const [startDate, endDate] = newDateRange;
+    setDateRange(dateRange);
+    const [startDate, endDate] = dateRange;
     const filtered = filterAttendanceByDateRange(startDate, endDate);
     setFilteredAttendance(filtered);
   };
@@ -199,6 +196,7 @@ function ManagerScreen() {
                   flexDirection: "column",
                   alignItems: "flex-start",
                   gap: 1,
+                  width: "100%",
                 }}
               >
                 <TextField
@@ -219,7 +217,7 @@ function ManagerScreen() {
                 />
                 <DateRangePicker
                   onChange={handleDateRangeChange}
-                  value={selectedDateRange}
+                  value={dateRange}
                   formatMonthYear={formatMonthYear}
                 />
                 <ManagerAttendance

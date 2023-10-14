@@ -66,99 +66,102 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
 
   if (!isMobileScreen) {
     return (
-      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              {[
-                "Date",
-                "Worker",
-                "Work Site",
-                "Check In Time",
-                "Check Out Time",
-              ].map((headCell) => (
-                <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
-                  {headCell}
-                </TableCell>
-              ))}
-              {!isMediumScreen && (
-                <TableCell key="Duration Worked" sx={{ fontWeight: "bold" }}>
-                  Duration Worked
-                </TableCell>
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendance
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, index) => (
-                <TableRow
-                  key={`${row.userId}_${row.checkInDateTime}`}
-                  sx={{
-                    backgroundColor:
-                      index % 2 === 1 ? "transparent" : "action.hover",
-                  }}
-                >
-                  <TableCell>{showDate(row.checkInDateTime)}</TableCell>
-                  <TableCell>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <Avatar
-                        src={profiles[row.userId].photoUrl}
-                        sx={{ width: 40, height: 40 }}
-                        variant="square"
-                      ></Avatar>
-                      <Typography variant="body2">
-                        {profiles[row.userId].name}
-                      </Typography>
-                    </Box>
+      <>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 50]}
+          count={attendance.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          SelectProps={{
+            inputProps: {
+              id: "rows-per-page",
+              "aria-label": "rows per page",
+            },
+          }}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        <TableContainer
+          component={Paper}
+          sx={{ overflowX: "auto", width: "100%" }}
+        >
+          <Table size="small" sx={{ width: "100%" }}>
+            <TableHead>
+              <TableRow>
+                {[
+                  "Date",
+                  "Worker",
+                  "Work Site",
+                  "Check In Time",
+                  "Check Out Time",
+                ].map((headCell) => (
+                  <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
+                    {headCell}
                   </TableCell>
-                  <TableCell>{row.worksite}</TableCell>
-                  <TableCell>{showCheckInTime(row.checkInDateTime)}</TableCell>
-                  <TableCell>
-                    {showCheckOutTime(
-                      row.checkInDateTime,
-                      row.checkOutDateTime,
-                      nowLoaded
-                    )}
+                ))}
+                {!isMediumScreen && (
+                  <TableCell key="Duration Worked" sx={{ fontWeight: "bold" }}>
+                    Duration Worked
                   </TableCell>
-                  {!isMediumScreen && (
+                )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {attendance
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => (
+                  <TableRow
+                    key={`${row.userId}_${row.checkInDateTime}`}
+                    sx={{
+                      backgroundColor:
+                        index % 2 === 1 ? "transparent" : "action.hover",
+                    }}
+                  >
+                    <TableCell>{showDate(row.checkInDateTime)}</TableCell>
                     <TableCell>
-                      {showTimeDiff(
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <Avatar
+                          src={profiles[row.userId].photoUrl}
+                          sx={{ width: 40, height: 40 }}
+                          variant="square"
+                        ></Avatar>
+                        <Typography variant="body2">
+                          {profiles[row.userId].name}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{row.worksite}</TableCell>
+                    <TableCell>
+                      {showCheckInTime(row.checkInDateTime)}
+                    </TableCell>
+                    <TableCell>
+                      {showCheckOutTime(
                         row.checkInDateTime,
                         row.checkOutDateTime,
                         nowLoaded
                       )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[10, 25, 50]}
-                count={attendance.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                SelectProps={{
-                  inputProps: {
-                    id: "rows-per-page",
-                    "aria-label": "rows per page",
-                  },
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
+                    {!isMediumScreen && (
+                      <TableCell>
+                        {showTimeDiff(
+                          row.checkInDateTime,
+                          row.checkOutDateTime,
+                          nowLoaded
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </>
     );
   } else {
     return (
@@ -170,7 +173,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
         hasMore={hasMore}
         loader={<CircularProgress />}
         endMessage={<Typography>No more records</Typography>}
-        scrollThreshold={"200px"}
+        scrollThreshold="200px"
         style={{ overflow: "hidden" }}
       >
         <List>

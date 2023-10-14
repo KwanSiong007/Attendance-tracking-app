@@ -56,6 +56,7 @@ function WorksitePie({ workerCount, countsByWorksite }) {
     margin: { top: 25, bottom: 25 },
     innerRadius: 0.5,
     cornerRadius: 5,
+    arcLabelsSkipAngle: 10,
     theme: {
       labels: {
         text: {
@@ -79,7 +80,6 @@ function WorksitePie({ workerCount, countsByWorksite }) {
       arcLinkLabelsSkipAngle: 10,
       arcLinkLabelsTextColor: "#333333",
       arcLinkLabelsColor: { from: "color" },
-      arcLabelsSkipAngle: 10,
       arcLabelsTextColor: "#333333",
     });
   }

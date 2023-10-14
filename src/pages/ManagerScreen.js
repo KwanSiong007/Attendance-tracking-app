@@ -7,7 +7,10 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  Tab,
+  Tabs,
   TextField,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -24,6 +27,7 @@ function ManagerScreen() {
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
+  const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,6 +115,10 @@ function ManagerScreen() {
     };
   }, []);
 
+  const handleTabChange = (e, newTab) => {
+    setTab(newTab);
+  };
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -129,53 +137,85 @@ function ManagerScreen() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
+          gap: 3,
           mb: 2,
         }}
       >
         {attendance && profiles && workerCount && countsByWorksite ? (
           <>
-            <Container
-              sx={{
-                height: "300px",
-              }}
+            <Tabs
+              value={tab}
+              onChange={handleTabChange}
+              variant={isMobileScreen ? "fullWidth" : "standard"}
             >
-              <WorksitePie
-                workerCount={workerCount}
-                countsByWorksite={countsByWorksite}
-              />
-            </Container>
-            <Container
-              sx={{
-                height: attendanceLineHeight,
-              }}
-            >
-              <AttendanceLine nowLoaded={nowLoaded} attendance={attendance} />
-            </Container>
-            <TextField
-              id="outlined-basic"
-              variant="outlined"
-              label="Search by Name"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{ alignSelf: "flex-start" }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <ManagerAttendance
-              nowLoaded={nowLoaded}
-              attendance={filteredAttendance}
-              profiles={profiles}
-              page={page}
-              setPage={setPage}
-            />
+              {["Log", "Dashboard"].map((label, index) => (
+                <Tab label={label} key={index} />
+              ))}
+            </Tabs>
+
+            {tab === 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: 1,
+                }}
+              >
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  label="Search by Name"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton>
+                          <SearchIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <ManagerAttendance
+                  nowLoaded={nowLoaded}
+                  attendance={filteredAttendance}
+                  profiles={profiles}
+                  page={page}
+                  setPage={setPage}
+                />
+              </Box>
+            )}
+
+            {tab === 1 && (
+              <>
+                <Typography variant="h6">
+                  Workers by Current Location
+                </Typography>
+                <Container
+                  sx={{
+                    height: "300px",
+                  }}
+                >
+                  <WorksitePie
+                    workerCount={workerCount}
+                    countsByWorksite={countsByWorksite}
+                  />
+                </Container>
+                <Typography variant="h6">Attendance for Last 7 Days</Typography>
+                <Container
+                  sx={{
+                    height: attendanceLineHeight,
+                  }}
+                >
+                  <AttendanceLine
+                    nowLoaded={nowLoaded}
+                    attendance={attendance}
+                  />
+                </Container>
+              </>
+            )}
           </>
         ) : (
           <CircularProgress />

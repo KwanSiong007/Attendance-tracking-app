@@ -21,12 +21,9 @@ const buildKey = (userId, dateObj) => {
   return `${userId}_${extractDate(dateObj)}`;
 };
 
-const showDate = (isoString, isSmallScreen) => {
-  if (!isSmallScreen) {
-    return format(parseISO(isoString), "EEE, d MMM");
-  } else {
-    return format(parseISO(isoString), "d MMM");
-  }
+const showDate = (isoString) => {
+  const parsed = parseISO(isoString);
+  return `${format(parsed, "EEE, d")}\u00A0${format(parsed, "MMM")}`;
 };
 
 const showCurrDate = (dateObj) => {
@@ -44,6 +41,19 @@ const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
     return "Pending";
   } else {
     return "Nil";
+  }
+};
+
+const showCheckInOutTime = (checkInIso, checkOutIso, nowLoaded) => {
+  const checkInParsed = parseISO(checkInIso);
+  const checkInStr = `${format(checkInParsed, "h:mm aa")}`;
+
+  if (checkOutIso) {
+    return `${checkInStr} \u2013 ${format(parseISO(checkOutIso), "h:mm aa")}`;
+  } else if (extractDate(parseISO(checkInIso)) === extractDate(nowLoaded)) {
+    return checkInStr;
+  } else {
+    return `${checkInStr} \u2013 Nil`;
   }
 };
 
@@ -99,6 +109,7 @@ export {
   showCurrDate,
   showCheckInTime,
   showCheckOutTime,
+  showCheckInOutTime,
   showTimeDiff,
   isWithinLastWeek,
   VisuallyHiddenInput,

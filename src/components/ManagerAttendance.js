@@ -1,7 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
+  Divider,
   Paper,
   List,
   ListItem,
@@ -24,6 +25,7 @@ import {
   showDate,
   showCheckInTime,
   showCheckOutTime,
+  showCheckInOutTime,
   showTimeDiff,
 } from "../utils";
 
@@ -31,7 +33,6 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleChangePage = (e, newPage) => {
@@ -78,9 +79,7 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
                       index % 2 === 1 ? "transparent" : "action.hover",
                   }}
                 >
-                  <TableCell>
-                    {showDate(row.checkInDateTime, isSmallScreen)}
-                  </TableCell>
+                  <TableCell>{showDate(row.checkInDateTime)}</TableCell>
                   <TableCell>
                     <Box
                       sx={{
@@ -144,19 +143,43 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     return (
       <List>
         {attendance.map((row) => (
-          <ListItem key={`${row.userId}_${row.checkInDateTime}`}>
-            <ListItemAvatar>
-              <Avatar
-                src={profiles[row.userId].photoUrl}
-                sx={{ width: 40, height: 40 }}
-                variant="square"
-              ></Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={row.worksite}
-              secondary={showCheckInTime(row.checkInDateTime)}
-            />
-          </ListItem>
+          <React.Fragment key={`${row.userId}_${row.checkInDateTime}`}>
+            <ListItem alignItems="flex-start" sx={{ py: 0.5 }}>
+              <ListItemAvatar>
+                <Avatar
+                  src={profiles[row.userId].photoUrl}
+                  sx={{ width: 40, height: 40 }}
+                  variant="square"
+                ></Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={profiles[row.userId].name}
+                secondary={[
+                  <Typography
+                    key="line1"
+                    component="span"
+                    display="block"
+                    variant="body2"
+                  >
+                    {showDate(row.checkInDateTime)} @ {row.worksite}
+                  </Typography>,
+                  <Typography
+                    key="line2"
+                    component="span"
+                    display="block"
+                    variant="body2"
+                  >
+                    {showCheckInOutTime(
+                      row.checkInDateTime,
+                      row.checkOutDateTime,
+                      nowLoaded
+                    )}
+                  </Typography>,
+                ]}
+              />
+            </ListItem>
+            <Divider variant="inset" />
+          </React.Fragment>
         ))}
       </List>
     );

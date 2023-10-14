@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -17,9 +17,11 @@ import {
   TableFooter,
   TablePagination,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 import {
   showDate,
@@ -31,6 +33,9 @@ import {
 
 function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [items, setItems] = useState(attendance.slice(0, 10));
+  const [hasMore, setHasMore] = useState(true);
+
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -42,6 +47,21 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
   const handleChangeRowsPerPage = (e) => {
     setRowsPerPage(parseInt(e.target.value, 10));
     setPage(0);
+  };
+
+  useEffect(() => {
+    setItems(attendance.slice(0, 10));
+    setHasMore(true);
+  }, [attendance]);
+
+  const fetchItems = () => {
+    if (items.length >= attendance.length) {
+      setHasMore(false);
+      return;
+    }
+    setTimeout(() => {
+      setItems(attendance.slice(0, items.length + 10));
+    }, 500);
   };
 
   if (!isMobileScreen) {
@@ -142,47 +162,59 @@ function ManagerAttendance({ nowLoaded, attendance, profiles, page, setPage }) {
     );
   } else {
     return (
-      <List>
-        {attendance.map((row) => (
-          <React.Fragment key={`${row.userId}_${row.checkInDateTime}`}>
-            <ListItem alignItems="flex-start" sx={{ py: 0.5 }}>
-              <ListItemAvatar>
-                <Avatar
-                  src={profiles[row.userId].photoUrl}
-                  sx={{ width: 40, height: 40 }}
-                  variant="square"
-                ></Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={profiles[row.userId].name}
-                secondary={[
-                  <Typography
-                    key="line1"
-                    component="span"
-                    display="block"
-                    variant="body2"
-                  >
-                    {showDate(row.checkInDateTime)} @ {row.worksite}
-                  </Typography>,
-                  <Typography
-                    key="line2"
-                    component="span"
-                    display="block"
-                    variant="body2"
-                  >
-                    {showCheckInOutTime(
-                      row.checkInDateTime,
-                      row.checkOutDateTime,
-                      nowLoaded
-                    )}
-                  </Typography>,
-                ]}
-              />
-            </ListItem>
-            <Divider variant="inset" />
-          </React.Fragment>
-        ))}
-      </List>
+      <InfiniteScroll
+        className="infinite-scroll"
+        overflowY="hidden"
+        dataLength={items.length}
+        next={fetchItems}
+        hasMore={hasMore}
+        loader={<CircularProgress />}
+        endMessage={<Typography>No more records</Typography>}
+        scrollThreshold={"200px"}
+        style={{ overflow: "hidden" }}
+      >
+        <List>
+          {items.map((row) => (
+            <React.Fragment key={`${row.userId}_${row.checkInDateTime}`}>
+              <ListItem alignItems="flex-start" sx={{ py: 0.5 }}>
+                <ListItemAvatar>
+                  <Avatar
+                    src={profiles[row.userId].photoUrl}
+                    sx={{ width: 40, height: 40 }}
+                    variant="square"
+                  ></Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={profiles[row.userId].name}
+                  secondary={[
+                    <Typography
+                      key="line1"
+                      component="span"
+                      display="block"
+                      variant="body2"
+                    >
+                      {showDate(row.checkInDateTime)} @ {row.worksite}
+                    </Typography>,
+                    <Typography
+                      key="line2"
+                      component="span"
+                      display="block"
+                      variant="body2"
+                    >
+                      {showCheckInOutTime(
+                        row.checkInDateTime,
+                        row.checkOutDateTime,
+                        nowLoaded
+                      )}
+                    </Typography>,
+                  ]}
+                />
+              </ListItem>
+              <Divider variant="inset" />
+            </React.Fragment>
+          ))}
+        </List>
+      </InfiniteScroll>
     );
   }
 }

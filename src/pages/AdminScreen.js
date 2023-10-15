@@ -124,6 +124,7 @@ function AdminScreen() {
       )}
       <TablePagination
         component="div"
+        rowsPerPageOptions={[]}
         count={users.length}
         rowsPerPage={ROWS_PER_PAGE}
         page={page}
@@ -147,20 +148,26 @@ function AdminScreen() {
           <TableBody>
             {users
               .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
-              .map((user) => (
-                <TableRow key={user.userId}>
-                  <TableCell>{user.name}</TableCell>
+              .map((row, index) => (
+                <TableRow
+                  key={row.userId}
+                  sx={{
+                    backgroundColor:
+                      index % 2 === 1 ? "transparent" : "action.hover",
+                  }}
+                >
+                  <TableCell>{row.name}</TableCell>
                   <TableCell>
-                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    {row.role.charAt(0).toUpperCase() + row.role.slice(1)}
                   </TableCell>
                   <TableCell>
                     <Select
                       size="small"
-                      value={userRoles[user.userId] || "noChange"}
+                      value={userRoles[row.userId] || "noChange"}
                       onChange={(e) =>
-                        handleRoleChange(user.userId, e.target.value)
+                        handleRoleChange(row.userId, e.target.value)
                       }
-                      sx={{ fontSize: "0.875rem" }}
+                      sx={{ fontSize: "0.875rem", backgroundColor: "white" }}
                     >
                       <MenuItem value="noChange">Select...</MenuItem>
                       <MenuItem value={ROLE.WORKER}>Worker</MenuItem>

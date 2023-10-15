@@ -78,7 +78,7 @@ function ManagerScreen() {
             showCheckOutTime(
               row.checkInDateTime,
               row.checkOutDateTime,
-              nowLoaded
+              nowLoaded.current
             ) === "Pending"
           ) {
             acc[row.worksite] = (acc[row.worksite] || 0) + 1;

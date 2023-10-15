@@ -93,7 +93,6 @@ const isWithinLastWeek = (checkInIso, nowLoaded) => {
 const getLastWeek = (nowLoaded) => {
   const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
   const startDate = startOfDay(subDays(dateLoaded, 6));
-  console.log([startDate, dateLoaded]);
 
   return [startDate, dateLoaded];
 };

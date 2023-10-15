@@ -37,18 +37,14 @@ const theme = createTheme({
 });
 
 function HomeScreen() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, loadingAuth } = useAuth();
   const [role, setRole] = useState("");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-
     const checkIfLoggedIn = (user) => {
       if (user) {
         setUser(user);
       }
-      setLoading(false);
     };
 
     reAuth(checkIfLoggedIn);
@@ -77,9 +73,9 @@ function HomeScreen() {
     setRole("");
   };
 
-  if (loading) return <CircularProgress sx={{ mt: 5 }} />;
-
-  if (user) {
+  if (loadingAuth) {
+    return <CircularProgress sx={{ mt: 5 }} />;
+  } else if (user) {
     return (
       <Box
         sx={{

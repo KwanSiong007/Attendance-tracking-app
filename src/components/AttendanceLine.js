@@ -1,8 +1,8 @@
 import { ResponsiveLine } from "@nivo/line";
 import { BasicTooltip } from "@nivo/tooltip";
-import { format } from "date-fns";
+import { format, eachDayOfInterval } from "date-fns";
 
-import { extractDate, isWithinLastWeek } from "../utils";
+import { extractDate, getLastWeek, isWithinLastWeek } from "../utils";
 
 function CustomTooltip({ point }) {
   const { x, y } = point.data;
@@ -11,13 +11,20 @@ function CustomTooltip({ point }) {
 }
 
 function AttendanceLine({ nowLoaded, attendance }) {
+  const [startDate, dateLoaded] = getLastWeek(nowLoaded);
+
+  const getZeroWorkers = (startDate, endDate) => {
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    return Object.fromEntries(days.map((day) => [extractDate(day), new Set()]));
+  };
+
   const workersLastWeek = Object.values(attendance).reduce((acc, row) => {
     if (isWithinLastWeek(row.checkInDateTime, nowLoaded)) {
       const dateLoaded = extractDate(row.checkInDateTime);
-      acc[dateLoaded] = (acc[dateLoaded] || new Set()).add(row.userId);
+      acc[dateLoaded].add(row.userId);
     }
     return acc;
-  }, {});
+  }, getZeroWorkers(startDate, dateLoaded));
 
   const attendanceLastWeek = Object.fromEntries(
     Object.entries(workersLastWeek).map(([date, users]) => [date, users.size])

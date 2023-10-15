@@ -24,9 +24,9 @@ import { database } from "../firebase";
 
 import WorkerScreen from "./WorkerScreen";
 import ManagerScreen from "./ManagerScreen";
+import AdminScreen from "./AdminScreen";
 import DB_KEY from "../constants/dbKey";
 import ROLE from "../constants/role";
-import AdminScreen from "./AdminScreen";
 
 const theme = createTheme({
   breakpoints: {
@@ -51,11 +51,11 @@ const theme = createTheme({
   },
 });
 
-function LogIn() {
+function HomeScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({});
   const [role, setRole] = useState("");
-  //The loading state is used to indicate whether the authentication check is still in progress.
+
   const [loading, setLoading] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [state, setState] = useState({
@@ -65,33 +65,16 @@ function LogIn() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    //This declares a function named checkIfLoggedIn which takes a user as an argument.
-    //It's used to check if a user is logged in and updates the component's state accordingly.
+    setLoading(true);
+
     const checkIfLoggedIn = (user) => {
-      //If there's a user, it means the user is logged in, so it does the following:
-      //Sets the isLoggedIn state to true, indicating that the user is logged in.
-      //Sets the loading state to false, indicating that the loading process is complete.
-      //Sets the user state with the user data.
       if (user) {
         setIsLoggedIn(true);
-        setLoading(false);
-        // User is signed in, see docs for a list of available properties
         setUser(user);
-        // console.log("user", user);
       }
-      //If there's no user, it means the user is not logged in or signed out, so it does the following:
-      //Sets the loading state to false, indicating that the loading process is complete.
-      else {
-        setLoading(false);
-        // User is signed out
-        return null;
-      }
+      setLoading(false);
     };
 
-    //This sets the loading state to true initially, indicating that the component is in the process of loading.
-    setLoading(true);
-    //Passes the checkIfLoggedIn function as a callback to reAuth.
-    //The purpose of this is to listen for changes in the user's authentication state, and when it changes, the checkIfLoggedIn function will be called with the user data (if the user is logged in) or null (if the user is not logged in).
     reAuth(checkIfLoggedIn);
   }, []);
 
@@ -142,6 +125,7 @@ function LogIn() {
         default:
           console.error(error);
       }
+      setLoggingIn(false);
     }
   };
 
@@ -161,11 +145,8 @@ function LogIn() {
     setError("");
   };
 
-  // when first load the page, the logic in the useEffect above is executed
-  // while the app is checking if the user is logged in, we will display a loading screen
   if (loading) return <CircularProgress sx={{ mt: 5 }} />;
 
-  // if the user is already signed in, display the below page
   if (isLoggedIn) {
     return (
       <Box
@@ -190,7 +171,6 @@ function LogIn() {
     );
   }
 
-  // if the user is NOT signed in, make them sign in
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -264,4 +244,4 @@ function LogIn() {
   );
 }
 
-export default LogIn;
+export default HomeScreen;

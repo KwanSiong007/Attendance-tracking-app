@@ -2,12 +2,17 @@ import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 
+import HomeScreen from "./pages/HomeScreen";
 import LogIn from "./pages/LogIn";
 import Register from "./pages/Register";
 
 const routes = [
   {
     path: "/",
+    element: <HomeScreen />,
+  },
+  {
+    path: "/log-in",
     element: <LogIn />,
   },
   {

@@ -13,11 +13,14 @@ import {
   Box,
   Button,
   MenuItem,
+  Paper,
   Select,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
 } from "@mui/material";
 
@@ -25,9 +28,13 @@ import { generateDummyCheckIns } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import ROLE from "../constants/role";
 
+const ROWS_PER_PAGE = 10;
+
 function AdminScreen() {
   const [users, setUsers] = useState([]);
   const [userRoles, setUserRoles] = useState({});
+
+  const [page, setPage] = useState(0);
 
   const handleGenerateData = () => {
     const recordsRef = ref(database, DB_KEY.CHECK_INS);
@@ -61,10 +68,14 @@ function AdminScreen() {
     fetchUsers();
   }, []);
 
+  const handleChangePage = (e, newPage) => {
+    setPage(newPage);
+  };
+
   const handleRoleChange = (userId, newRole) => {
     setUserRoles((prev) => ({
       ...prev,
-      [userId]: newRole === "No change" ? undefined : newRole,
+      [userId]: newRole === "noChange" ? undefined : newRole,
     }));
   };
 
@@ -96,12 +107,14 @@ function AdminScreen() {
 
   return (
     <Box
+      maxWidth="md"
       sx={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: 2,
         mb: 2,
+        // width: "100%",
       }}
     >
       {process.env.NODE_ENV === "development" && (
@@ -109,47 +122,65 @@ function AdminScreen() {
           Generate dummy check ins
         </Button>
       )}
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Current Role</TableCell>
-            <TableCell>New Role</TableCell>
-            <TableCell>Action</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.userId}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.role}</TableCell>
-              <TableCell>
-                <Select
-                  value={userRoles[user.userId] || "No change"}
-                  onChange={(e) =>
-                    handleRoleChange(user.userId, e.target.value)
-                  }
-                >
-                  <MenuItem value="No change">No change</MenuItem>
-                  <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
-                  <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
-                  <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
-                </Select>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={!userRoles[user.userId]}
-                  onClick={handleSaveChanges}
-                >
-                  Save
-                </Button>
-              </TableCell>
+      <TablePagination
+        component="div"
+        count={users.length}
+        rowsPerPage={ROWS_PER_PAGE}
+        page={page}
+        onPageChange={handleChangePage}
+        sx={{ width: "100%" }}
+      />
+      <TableContainer
+        component={Paper}
+        sx={{ overflowX: "auto", width: "100%" }}
+      >
+        <Table size="small" sx={{ width: "100%" }}>
+          <TableHead>
+            <TableRow>
+              {["Name", "Role", "New Role"].map((headCell) => (
+                <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
+                  {headCell}
+                </TableCell>
+              ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {users
+              .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
+              .map((user) => (
+                <TableRow key={user.userId}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      size="small"
+                      value={userRoles[user.userId] || "noChange"}
+                      onChange={(e) =>
+                        handleRoleChange(user.userId, e.target.value)
+                      }
+                      sx={{ fontSize: "0.875rem" }}
+                    >
+                      <MenuItem value="noChange">Select...</MenuItem>
+                      <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
+                      <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
+                      <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Button
+        variant="contained"
+        color="primary"
+        disabled={Object.values(userRoles).every((role) => role === undefined)}
+        onClick={handleSaveChanges}
+      >
+        Update Roles
+      </Button>
     </Box>
   );
 }

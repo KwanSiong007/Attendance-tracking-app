@@ -203,7 +203,7 @@ function ManagerScreen() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
+                  alignItems: { xs: "center", mobile: "flex-start" },
                   gap: 1,
                   width: "100%",
                 }}
@@ -211,9 +211,10 @@ function ManagerScreen() {
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: { mobile: "row", xs: "column" },
-                    gap: { mobile: 3, xs: 2 },
-                    width: { mobile: "auto", xs: "100%" },
+                    flexDirection: { xs: "column", mobile: "row" },
+                    alignItems: { xs: "center", mobile: "normal" },
+                    gap: { xs: 2, mobile: 3 },
+                    width: { xs: "100%", mobile: "auto" },
                   }}
                 >
                   <TextField

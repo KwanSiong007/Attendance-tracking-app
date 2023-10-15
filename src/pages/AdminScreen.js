@@ -124,9 +124,11 @@ function AdminScreen() {
         mb: 2,
       }}
     >
-      <Button onClick={handleGenerate} variant="contained">
-        Generate dummy check ins
-      </Button>
+      {process.env.NODE_ENV === "development" && (
+        <Button onClick={handleGenerate} variant="contained">
+          Generate dummy check ins
+        </Button>
+      )}
     </Box>
   );
 }

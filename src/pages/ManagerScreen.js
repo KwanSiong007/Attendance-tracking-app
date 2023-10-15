@@ -207,9 +207,10 @@ function ManagerScreen() {
                   sx={{
                     display: "flex",
                     flexDirection: { xs: "column", mobile: "row" },
-                    alignItems: { xs: "center", mobile: "normal" },
+                    alignItems: { xs: "stretch", mobile: "normal" },
                     gap: { xs: 2, mobile: 3 },
                     width: { xs: "100%", mobile: "auto" },
+                    maxWidth: { xs: "275px", mobile: "100%" },
                   }}
                 >
                   <TextField

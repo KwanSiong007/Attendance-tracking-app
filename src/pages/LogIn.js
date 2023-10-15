@@ -141,7 +141,6 @@ function LogIn() {
           Need an account? <Link to="/register">Register</Link>
         </Typography>
       </Box>
-      {toHomeScreen && "hello"}
       {toHomeScreen && <Navigate to="/" replace />}
     </Container>
   );

@@ -39,7 +39,8 @@ const ROWS_PER_PAGE = 10;
 
 function AdminScreen() {
   const [users, setUsers] = useState([]);
-  const [tab, setTab] = useState(0);
+  // TODO: Switch this back to 0
+  const [tab, setTab] = useState(1);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -118,7 +119,6 @@ function AdminScreen() {
 
   return (
     <Box
-      maxWidth="md"
       sx={{
         display: "flex",
         flexDirection: "column",

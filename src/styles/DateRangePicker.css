@@ -22,7 +22,12 @@
   flex-grow: 1;
   flex-shrink: 0;
   align-items: center;
-  border: thin solid gray;
+  border: thin solid rgba(0, 0, 0, 0.23);
+  &:hover {
+    border: thin solid rgba(0, 0, 0, 0.87);
+  }
+  border-radius: 4px;
+  max-width: 330px;
 }
 
 .react-daterange-picker__inputGroup {

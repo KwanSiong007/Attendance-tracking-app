@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
 
@@ -25,48 +25,38 @@ import { format } from "date-fns";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
-import { showCheckOutTime } from "../utils";
+import { showCheckOutTime, getLastWeek } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import AttendanceLine from "../components/AttendanceLine";
 
 function ManagerScreen() {
-  const [nowLoaded, setNowLoaded] = useState(null);
+  const nowLoaded = useRef(new Date());
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
   const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [nameQuery, setSearchQuery] = useState("");
   const [filteredAttendance, setFilteredAttendance] = useState([]);
 
   const [workerCount, setWorkerCount] = useState(0);
   const [countsByWorksite, setCountsByWorksite] = useState({});
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1
-  );
-  const [selectedDateRange, setSelectedDateRange] = useState([
-    firstDayOfMonth,
-    new Date(),
-  ]);
+  const [dateRange, setDateRange] = useState(getLastWeek(new Date()));
 
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
   const attendanceLineHeight = isMobileScreen ? `calc(5/8 * 100vw)` : "300px";
 
   useEffect(() => {
-    const nowLoaded = new Date();
-    setNowLoaded(nowLoaded);
-
     const attendanceRef = ref(database, DB_KEY.CHECK_INS);
     const profilesRef = ref(database, DB_KEY.PROFILES);
 
     const unsubscribeAttendance = onValue(
       attendanceRef,
       (snapshot) => {
+        nowLoaded.current = new Date();
+
         let attendance = [];
 
         snapshot.forEach((childSnapshot) => {
@@ -104,6 +94,8 @@ function ManagerScreen() {
     const unsubscribeProfiles = onValue(
       profilesRef,
       (snapshot) => {
+        nowLoaded.current = new Date();
+
         let profiles = {};
 
         snapshot.forEach((childSnapshot) => {
@@ -136,33 +128,42 @@ function ManagerScreen() {
     setTab(newTab);
   };
 
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    const filteredAttendance = attendance.filter((row) =>
-      profiles[row.userId].name.toLowerCase().includes(query.toLowerCase())
-    );
+  const handleFilterChange = useCallback(() => {
+    let filtered = [...attendance];
+
+    if (nameQuery) {
+      filtered = filtered.filter((row) =>
+        profiles[row.userId].name
+          .toLowerCase()
+          .includes(nameQuery.toLowerCase())
+      );
+    }
+
+    const [startDate, endDate] = dateRange;
+
+    filtered = filtered.filter((row) => {
+      const checkInDateTime = new Date(row.checkInDateTime);
+      return checkInDateTime >= startDate && checkInDateTime < endDate;
+    });
 
     setPage(0);
-    setFilteredAttendance(filteredAttendance);
+    setFilteredAttendance(filtered);
+  }, [attendance, profiles, nameQuery, dateRange]);
+
+  useEffect(() => {
+    handleFilterChange();
+  }, [nameQuery, dateRange, handleFilterChange]);
+
+  const handleNameQueryChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
-  const filterAttendanceByDateRange = (startDate, endDate) => {
-    return attendance.filter((row) => {
-      const checkInDateTime = new Date(row.checkInDateTime);
-      return checkInDateTime >= startDate && checkInDateTime <= endDate;
-    });
-  };
-
-  const handleDateRangeChange = (newDateRange) => {
-    if (!newDateRange) {
-      setSelectedDateRange([firstDayOfMonth, new Date()]);
+  const handleDateRangeChange = (dateRange) => {
+    if (!dateRange) {
+      setDateRange(getLastWeek(nowLoaded.current));
       return;
     }
-    setSelectedDateRange(newDateRange);
-    const [startDate, endDate] = newDateRange;
-    const filtered = filterAttendanceByDateRange(startDate, endDate);
-    setFilteredAttendance(filtered);
+    setDateRange(dateRange);
   };
 
   const formatMonthYear = (locale, date) => {
@@ -197,33 +198,68 @@ function ManagerScreen() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
+                  alignItems: { xs: "center", mobile: "flex-start" },
                   gap: 1,
+                  width: "100%",
                 }}
               >
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  label="Search by Name"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", mobile: "row" },
+                    alignItems: { xs: "center", mobile: "normal" },
+                    gap: { xs: 2, mobile: 3 },
+                    width: { xs: "100%", mobile: "auto" },
                   }}
-                />
-                <DateRangePicker
-                  onChange={handleDateRangeChange}
-                  value={selectedDateRange}
-                  formatMonthYear={formatMonthYear}
-                />
+                >
+                  <TextField
+                    variant="outlined"
+                    label="Worker Name"
+                    value={nameQuery}
+                    onChange={handleNameQueryChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton>
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      maxWidth: "330px",
+                      "& .MuiOutlinedInput-root": {
+                        paddingRight: 0,
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        height: "50px",
+                        paddingBlock: 0,
+                        fontSize: "0.875rem",
+                      },
+                      "& .MuiInputLabel-outlined": {
+                        transition:
+                          "transform 200ms cubic-bezier(0, 0, 0.2, 1), top 200ms cubic-bezier(0, 0, 0.2, 1), font-size 200ms cubic-bezier(0, 0, 0.2, 1)",
+                        "&:not(.MuiInputLabel-shrink)": {
+                          fontSize: "0.875rem",
+                          top: "50%",
+                          transform: "translate(0.875rem, -50%)",
+                        },
+                        "&.MuiInputLabel-shrink": {
+                          top: 0,
+                          transform:
+                            "translate(0.875rem, 0) scale(0.75) transform(0, -50%)",
+                        },
+                      },
+                    }}
+                  />
+                  <DateRangePicker
+                    onChange={handleDateRangeChange}
+                    value={dateRange}
+                    formatMonthYear={formatMonthYear}
+                  />
+                </Box>
                 <ManagerAttendance
-                  nowLoaded={nowLoaded}
+                  nowLoaded={nowLoaded.current}
                   attendance={filteredAttendance}
                   profiles={profiles}
                   page={page}
@@ -254,7 +290,7 @@ function ManagerScreen() {
                   }}
                 >
                   <AttendanceLine
-                    nowLoaded={nowLoaded}
+                    nowLoaded={nowLoaded.current}
                     attendance={attendance}
                   />
                 </Container>

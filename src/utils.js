@@ -90,6 +90,14 @@ const isWithinLastWeek = (checkInIso, nowLoaded) => {
   return isWithinInterval(checkInDate, { start: startDate, end: endDate });
 };
 
+const getLastWeek = (nowLoaded) => {
+  const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
+  const startDate = startOfDay(subDays(dateLoaded, 6));
+  console.log([startDate, dateLoaded]);
+
+  return [startDate, dateLoaded];
+};
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -112,5 +120,6 @@ export {
   showCheckInOutTime,
   showTimeDiff,
   isWithinLastWeek,
+  getLastWeek,
   VisuallyHiddenInput,
 };

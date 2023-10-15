@@ -74,6 +74,13 @@
 
 .react-calendar__month-view__weekdays__weekday {
   padding: 0.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
 }
 
 .react-calendar__month-view__weekNumbers .react-calendar__tile {

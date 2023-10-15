@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
 
@@ -25,12 +25,12 @@ import { format } from "date-fns";
 
 import WorksitePie from "../components/WorksitePie";
 import ManagerAttendance from "../components/ManagerAttendance";
-import { showCheckOutTime } from "../utils";
+import { showCheckOutTime, getLastWeek } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import AttendanceLine from "../components/AttendanceLine";
 
 function ManagerScreen() {
-  const [nowLoaded, setNowLoaded] = useState(null);
+  const nowLoaded = useRef(new Date());
   const [attendance, setAttendance] = useState([]);
   const [profiles, setProfiles] = useState(null);
 
@@ -42,28 +42,21 @@ function ManagerScreen() {
 
   const [workerCount, setWorkerCount] = useState(0);
   const [countsByWorksite, setCountsByWorksite] = useState({});
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1
-  );
-  const [dateRange, setDateRange] = useState([firstDayOfMonth, new Date()]);
+  const [dateRange, setDateRange] = useState(getLastWeek(new Date()));
 
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
   const attendanceLineHeight = isMobileScreen ? `calc(5/8 * 100vw)` : "300px";
 
   useEffect(() => {
-    const nowLoaded = new Date();
-    setNowLoaded(nowLoaded);
-
     const attendanceRef = ref(database, DB_KEY.CHECK_INS);
     const profilesRef = ref(database, DB_KEY.PROFILES);
 
     const unsubscribeAttendance = onValue(
       attendanceRef,
       (snapshot) => {
+        nowLoaded.current = new Date();
+
         let attendance = [];
 
         snapshot.forEach((childSnapshot) => {
@@ -101,6 +94,8 @@ function ManagerScreen() {
     const unsubscribeProfiles = onValue(
       profilesRef,
       (snapshot) => {
+        nowLoaded.current = new Date();
+
         let profiles = {};
 
         snapshot.forEach((childSnapshot) => {
@@ -165,7 +160,7 @@ function ManagerScreen() {
 
   const handleDateRangeChange = (dateRange) => {
     if (!dateRange) {
-      setDateRange([firstDayOfMonth, new Date()]);
+      setDateRange(getLastWeek(nowLoaded.current));
       return;
     }
     setDateRange(dateRange);
@@ -264,7 +259,7 @@ function ManagerScreen() {
                   />
                 </Box>
                 <ManagerAttendance
-                  nowLoaded={nowLoaded}
+                  nowLoaded={nowLoaded.current}
                   attendance={filteredAttendance}
                   profiles={profiles}
                   page={page}
@@ -295,7 +290,7 @@ function ManagerScreen() {
                   }}
                 >
                   <AttendanceLine
-                    nowLoaded={nowLoaded}
+                    nowLoaded={nowLoaded.current}
                     attendance={attendance}
                   />
                 </Container>

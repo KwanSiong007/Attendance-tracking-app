@@ -16,6 +16,8 @@ import {
   MenuItem,
   Paper,
   Select,
+  Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
@@ -25,7 +27,10 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
+import WorksiteConfig from "../components/WorksiteConfig";
 import { generateDummyCheckIns } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import ROLE from "../constants/role";
@@ -34,8 +39,16 @@ const ROWS_PER_PAGE = 10;
 
 function AdminScreen() {
   const [users, setUsers] = useState([]);
+  const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down("mobile"));
+
+  const handleTabChange = (e, newTab) => {
+    setTab(newTab);
+  };
 
   const handleGenerateData = () => {
     const recordsRef = ref(database, DB_KEY.CHECK_INS);
@@ -119,72 +132,90 @@ function AdminScreen() {
           Generate dummy check ins
         </Button>
       )}
-      <TablePagination
-        component="div"
-        rowsPerPageOptions={[]}
-        count={users.length}
-        rowsPerPage={ROWS_PER_PAGE}
-        page={page}
-        onPageChange={handleChangePage}
-        sx={{ width: "100%" }}
-      />
-      <TableContainer
-        component={Paper}
-        sx={{ overflowX: "auto", width: "100%" }}
+      <Tabs
+        value={tab}
+        onChange={handleTabChange}
+        variant={isMobileScreen ? "fullWidth" : "standard"}
       >
-        <Table size="small" sx={{ width: "100%" }}>
-          <TableHead>
-            <TableRow>
-              {["Name", "Role"].map((headCell) => (
-                <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
-                  {headCell}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users
-              .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
-              .map((row, index) => (
-                <TableRow
-                  key={row.userId}
-                  sx={{
-                    backgroundColor:
-                      index % 2 === 1 ? "transparent" : "action.hover",
-                  }}
-                >
-                  <TableCell>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2">{row.name}</Typography>
-                      }
-                      secondary={row.email}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ paddingLeft: 0 }}>
-                    <Select
-                      size="small"
-                      value={row.role}
-                      onChange={(e) =>
-                        handleRoleChange(row.userId, e.target.value)
-                      }
-                      disabled={loading}
+        {["Roles", "Worksites"].map((label, index) => (
+          <Tab label={label} key={index} />
+        ))}
+      </Tabs>
+      {tab === 0 && (
+        <>
+          <TablePagination
+            component="div"
+            rowsPerPageOptions={[]}
+            count={users.length}
+            rowsPerPage={ROWS_PER_PAGE}
+            page={page}
+            onPageChange={handleChangePage}
+            sx={{ width: "100%" }}
+          />
+          <TableContainer
+            component={Paper}
+            sx={{ overflowX: "auto", width: "100%" }}
+          >
+            <Table size="small" sx={{ width: "100%" }}>
+              <TableHead>
+                <TableRow>
+                  {["Name", "Role"].map((headCell) => (
+                    <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
+                      {headCell}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users
+                  .slice(
+                    page * ROWS_PER_PAGE,
+                    page * ROWS_PER_PAGE + ROWS_PER_PAGE
+                  )
+                  .map((row, index) => (
+                    <TableRow
+                      key={row.userId}
                       sx={{
-                        fontSize: "0.875rem",
-                        backgroundColor: "white",
-                        width: "100%",
+                        backgroundColor:
+                          index % 2 === 1 ? "transparent" : "action.hover",
                       }}
                     >
-                      <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
-                      <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
-                      <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
-                    </Select>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                      <TableCell>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2">{row.name}</Typography>
+                          }
+                          secondary={row.email}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ paddingLeft: 0 }}>
+                        <Select
+                          size="small"
+                          value={row.role}
+                          onChange={(e) =>
+                            handleRoleChange(row.userId, e.target.value)
+                          }
+                          disabled={loading}
+                          sx={{
+                            fontSize: "0.875rem",
+                            backgroundColor: "white",
+                            width: "100%",
+                          }}
+                        >
+                          <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
+                          <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
+                          <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
+
+      {tab === 1 && <WorksiteConfig />}
     </Box>
   );
 }

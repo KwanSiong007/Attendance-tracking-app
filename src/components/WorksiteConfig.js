@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { ref, push, set } from "firebase/database";
+import {
+  ref,
+  push,
+  set,
+  onChildAdded,
+  onChildRemoved,
+  onChildChanged,
+} from "firebase/database";
 import { database } from "../firebase";
 import { Container } from "@mui/material";
 import mapboxgl from "mapbox-gl";
@@ -53,12 +60,64 @@ function WorksiteConfig() {
           name: name,
           coordinates: event.features[0].geometry.coordinates[0],
         };
+
         await writeWorksite(worksite);
+        draw.deleteAll();
         alert("Worksite saved!");
       } catch (error) {
         console.error("Error saving the worksite:", error);
       }
     });
+
+    map.on("load", () => {
+      const worksitesRef = ref(database, DB_KEY.WORKSITES);
+
+      onChildAdded(worksitesRef, (snapshot) => {
+        const worksite = snapshot.val();
+        map.addLayer({
+          id: snapshot.key,
+          type: "fill",
+          source: {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              geometry: {
+                type: "Polygon",
+                coordinates: [worksite.coordinates],
+              },
+            },
+          },
+          paint: {
+            "fill-color": "#888888",
+            "fill-opacity": 0.5,
+          },
+        });
+      });
+
+      onChildRemoved(worksitesRef, (snapshot) => {
+        if (map.getLayer(snapshot.key)) {
+          map.removeLayer(snapshot.key);
+          map.removeSource(snapshot.key);
+        }
+      });
+
+      onChildChanged(worksitesRef, (snapshot) => {
+        const worksite = snapshot.val();
+        if (map.getSource(snapshot.key)) {
+          map.getSource(snapshot.key).setData({
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: [worksite.coordinates],
+            },
+          });
+        }
+      });
+    });
+
+    return () => {
+      map.remove();
+    };
   }, []);
 
   return (

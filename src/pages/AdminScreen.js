@@ -12,7 +12,7 @@ import { database } from "../firebase";
 import {
   Box,
   Button,
-  CircularProgress,
+  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -23,6 +23,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Typography,
 } from "@mui/material";
 
 import { generateDummyCheckIns } from "../utils";
@@ -33,10 +34,7 @@ const ROWS_PER_PAGE = 10;
 
 function AdminScreen() {
   const [users, setUsers] = useState([]);
-  const [userRoles, setUserRoles] = useState({});
-
   const [page, setPage] = useState(0);
-
   const [loading, setLoading] = useState(false);
 
   const handleGenerateData = () => {
@@ -74,36 +72,35 @@ function AdminScreen() {
     setPage(newPage);
   };
 
-  const handleRoleChange = (userId, newRole) => {
-    setUserRoles((prev) => ({
-      ...prev,
-      [userId]: newRole === "noChange" ? undefined : newRole,
-    }));
-  };
-
-  const handleSaveChanges = async () => {
+  const handleRoleChange = async (userId, newRole) => {
     setLoading(true);
 
-    for (const [userId, newRole] of Object.entries(userRoles)) {
-      if (newRole) {
-        const profilesRef = ref(database, DB_KEY.PROFILES);
-        const q = query(profilesRef, orderByChild("userId"), equalTo(userId));
-        const snapshot = await get(q);
+    try {
+      const profilesRef = ref(database, DB_KEY.PROFILES);
 
-        if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const userKey = childSnapshot.key;
-            const userRef = ref(database, `${DB_KEY.PROFILES}/${userKey}`);
-            update(userRef, { role: newRole });
-          });
-        } else {
-          console.error(`No user found with userId: ${userId}`);
-        }
+      const q = query(profilesRef, orderByChild("userId"), equalTo(userId));
+      const snapshot = await get(q);
+
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const userKey = childSnapshot.key;
+          const userRef = ref(database, `${DB_KEY.PROFILES}/${userKey}`);
+          update(userRef, { role: newRole });
+
+          setUsers((prevUsers) =>
+            prevUsers.map((user) =>
+              user.userId === userId ? { ...user, role: newRole } : user
+            )
+          );
+        });
+      } else {
+        console.error(`No user found with userId: ${userId}`);
       }
+    } catch (error) {
+      console.error("Error updating role: ", error);
+    } finally {
+      setLoading(false);
     }
-
-    await fetchUsers();
-    setLoading(false);
   };
 
   return (
@@ -138,7 +135,7 @@ function AdminScreen() {
         <Table size="small" sx={{ width: "100%" }}>
           <TableHead>
             <TableRow>
-              {["Name", "Role", "New Role"].map((headCell) => (
+              {["Name", "Role"].map((headCell) => (
                 <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
                   {headCell}
                 </TableCell>
@@ -156,20 +153,28 @@ function AdminScreen() {
                       index % 2 === 1 ? "transparent" : "action.hover",
                   }}
                 >
-                  <TableCell>{row.name}</TableCell>
                   <TableCell>
-                    {row.role.charAt(0).toUpperCase() + row.role.slice(1)}
+                    <ListItemText
+                      primary={
+                        <Typography variant="body2">{row.name}</Typography>
+                      }
+                      secondary={row.email}
+                    />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ paddingLeft: 0 }}>
                     <Select
                       size="small"
-                      value={userRoles[row.userId] || "noChange"}
+                      value={row.role}
                       onChange={(e) =>
                         handleRoleChange(row.userId, e.target.value)
                       }
-                      sx={{ fontSize: "0.875rem", backgroundColor: "white" }}
+                      disabled={loading}
+                      sx={{
+                        fontSize: "0.875rem",
+                        backgroundColor: "white",
+                        width: "100%",
+                      }}
                     >
-                      <MenuItem value="noChange">Select...</MenuItem>
                       <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
                       <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
                       <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
@@ -180,20 +185,6 @@ function AdminScreen() {
           </TableBody>
         </Table>
       </TableContainer>
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={Object.values(userRoles).every(
-            (role) => role === undefined
-          )}
-          onClick={handleSaveChanges}
-        >
-          Update Roles
-        </Button>
-      )}
     </Box>
   );
 }

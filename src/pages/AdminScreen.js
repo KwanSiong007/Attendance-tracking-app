@@ -12,6 +12,7 @@ import { database } from "../firebase";
 import {
   Box,
   Button,
+  CircularProgress,
   MenuItem,
   Paper,
   Select,
@@ -36,6 +37,8 @@ function AdminScreen() {
 
   const [page, setPage] = useState(0);
 
+  const [loading, setLoading] = useState(false);
+
   const handleGenerateData = () => {
     const recordsRef = ref(database, DB_KEY.CHECK_INS);
     get(recordsRef).then((snapshot) => {
@@ -50,21 +53,20 @@ function AdminScreen() {
     });
   };
 
-  useEffect(() => {
-    // Fetch users and their roles from Firebase RTDB
-    const fetchUsers = async () => {
-      const profilesRef = ref(database, DB_KEY.PROFILES);
-      const snapshot = await get(query(profilesRef, orderByChild("userId")));
-      let fetchedUsers = [];
-      snapshot.forEach((childSnapshot) => {
-        fetchedUsers.push({
-          userId: childSnapshot.key,
-          ...childSnapshot.val(),
-        });
+  const fetchUsers = async () => {
+    const profilesRef = ref(database, DB_KEY.PROFILES);
+    const snapshot = await get(query(profilesRef, orderByChild("userId")));
+    let fetchedUsers = [];
+    snapshot.forEach((childSnapshot) => {
+      fetchedUsers.push({
+        userId: childSnapshot.key,
+        ...childSnapshot.val(),
       });
-      setUsers(fetchedUsers);
-    };
+    });
+    setUsers(fetchedUsers);
+  };
 
+  useEffect(() => {
     fetchUsers();
   }, []);
 
@@ -80,19 +82,17 @@ function AdminScreen() {
   };
 
   const handleSaveChanges = async () => {
-    // Persist changes to Firebase
+    setLoading(true);
+
     for (const [userId, newRole] of Object.entries(userRoles)) {
       if (newRole) {
-        // Query to find the key of the user with the matching userId
         const profilesRef = ref(database, DB_KEY.PROFILES);
         const q = query(profilesRef, orderByChild("userId"), equalTo(userId));
         const snapshot = await get(q);
 
-        // Check if user exists
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
             const userKey = childSnapshot.key;
-            // Update the role of the user with the found key
             const userRef = ref(database, `${DB_KEY.PROFILES}/${userKey}`);
             update(userRef, { role: newRole });
           });
@@ -102,7 +102,8 @@ function AdminScreen() {
       }
     }
 
-    // Potentially fetch users again to ensure local state is in sync with DB
+    await fetchUsers();
+    setLoading(false);
   };
 
   return (
@@ -114,7 +115,6 @@ function AdminScreen() {
         alignItems: "center",
         gap: 2,
         mb: 2,
-        // width: "100%",
       }}
     >
       {process.env.NODE_ENV === "development" && (
@@ -173,14 +173,20 @@ function AdminScreen() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={Object.values(userRoles).every((role) => role === undefined)}
-        onClick={handleSaveChanges}
-      >
-        Update Roles
-      </Button>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={Object.values(userRoles).every(
+            (role) => role === undefined
+          )}
+          onClick={handleSaveChanges}
+        >
+          Update Roles
+        </Button>
+      )}
     </Box>
   );
 }

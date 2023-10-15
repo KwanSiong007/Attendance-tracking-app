@@ -13,28 +13,28 @@ import { styled } from "@mui/material/styles";
 
 const TIME_ZONE = "Asia/Singapore";
 
-const extractDate = (dateObj) => {
+export const extractDate = (dateObj) => {
   return format(utcToZonedTime(dateObj, TIME_ZONE), "yyyy-MM-dd");
 };
 
-const buildKey = (userId, dateObj) => {
+export const buildKey = (userId, dateObj) => {
   return `${userId}_${extractDate(dateObj)}`;
 };
 
-const showDate = (isoString) => {
+export const showDate = (isoString) => {
   const parsed = parseISO(isoString);
   return `${format(parsed, "EEE, d")}\u00A0${format(parsed, "MMM")}`;
 };
 
-const showCurrDate = (dateObj) => {
+export const showCurrDate = (dateObj) => {
   return format(utcToZonedTime(dateObj, TIME_ZONE), "EEE, d MMM");
 };
 
-const showCheckInTime = (isoString) => {
+export const showCheckInTime = (isoString) => {
   return format(parseISO(isoString), "h:mm aa");
 };
 
-const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
+export const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
   if (checkOutIso) {
     return format(parseISO(checkOutIso), "h:mm aa");
   } else if (extractDate(parseISO(checkInIso)) === extractDate(nowLoaded)) {
@@ -44,7 +44,7 @@ const showCheckOutTime = (checkInIso, checkOutIso, nowLoaded) => {
   }
 };
 
-const showCheckInOutTime = (checkInIso, checkOutIso, nowLoaded) => {
+export const showCheckInOutTime = (checkInIso, checkOutIso, nowLoaded) => {
   const checkInParsed = parseISO(checkInIso);
   const checkInStr = `${format(checkInParsed, "h:mm aa")}`;
 
@@ -57,7 +57,7 @@ const showCheckInOutTime = (checkInIso, checkOutIso, nowLoaded) => {
   }
 };
 
-const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
+export const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
   if (checkOutIso) {
     const start = parseISO(checkInIso);
     const end = parseISO(checkOutIso);
@@ -81,7 +81,7 @@ const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
   }
 };
 
-const isWithinLastWeek = (checkInIso, nowLoaded) => {
+export const isWithinLastWeek = (checkInIso, nowLoaded) => {
   const checkInDate = utcToZonedTime(parseISO(checkInIso), TIME_ZONE);
   const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
   const startDate = startOfDay(subDays(dateLoaded, 6));
@@ -90,14 +90,14 @@ const isWithinLastWeek = (checkInIso, nowLoaded) => {
   return isWithinInterval(checkInDate, { start: startDate, end: endDate });
 };
 
-const getLastWeek = (nowLoaded) => {
+export const getLastWeek = (nowLoaded) => {
   const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
   const startDate = startOfDay(subDays(dateLoaded, 6));
 
   return [startDate, dateLoaded];
 };
 
-const VisuallyHiddenInput = styled("input")({
+export const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
   height: 1,
@@ -108,17 +108,3 @@ const VisuallyHiddenInput = styled("input")({
   whiteSpace: "nowrap",
   width: 1,
 });
-
-export {
-  extractDate,
-  buildKey,
-  showDate,
-  showCurrDate,
-  showCheckInTime,
-  showCheckOutTime,
-  showCheckInOutTime,
-  showTimeDiff,
-  isWithinLastWeek,
-  getLastWeek,
-  VisuallyHiddenInput,
-};

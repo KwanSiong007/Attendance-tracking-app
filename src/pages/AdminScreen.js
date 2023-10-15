@@ -1,121 +1,114 @@
-import { get, push, ref } from "firebase/database";
+import React, { useEffect, useState } from "react";
+import {
+  get,
+  query,
+  orderByChild,
+  equalTo,
+  push,
+  ref,
+  update,
+} from "firebase/database";
 import { database } from "../firebase";
-import { Box, Button } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+} from "@mui/material";
 
-import { buildKey } from "../utils";
+import { generateDummyCheckIns } from "../utils";
 import DB_KEY from "../constants/dbKey";
+import ROLE from "../constants/role";
+
+const ROWS_PER_PAGE = 10;
 
 function AdminScreen() {
-  const getRandomTime = (start, end) => {
-    return new Date(
-      start.getTime() + Math.random() * (end.getTime() - start.getTime())
-    );
-  };
+  const [users, setUsers] = useState([]);
+  const [userRoles, setUserRoles] = useState({});
 
-  const generateDummyCheckIns = (recordsRef) => {
-    const userIds = [
-      "QraQMwlSDOconsJCeGloNZowfFN2",
-      "SYCE7o6TV4a6HmRmBPsMvCcv0zm1",
-      "qIbUtgOWf7Sgtjd8F4tyZ6Lu8V73",
-      "gmTxj107fkMcEE5fOaAEv6E0cx03",
-      "pRxuCqrJybMy9dAZfBbMeVrJwd52",
-      "nnWebmCOGSd4kQGUMJdNzvHp15s2",
-      "TO3meGdg9fQGcGewKSXDtz9drqi2",
-      "xTIXPEjfHJT8cEQ2SnAd2idwaCE2",
-      "j5XD5AZEflhyyqshHo9CQ5UlFnu1",
-      "ntaGHGbZbMQYhXzxfEz2pJVpkSl1",
-      "4EfPJiYginQbZLIu814P2sKrehu2",
-      "inkSeiy27ve5WGxH43rPIKCGCzl2",
-    ];
-    const worksites = ["Jurong", "Paya Lebar", "Tanjong Pagar", "Woodlands"];
-    const startDate = new Date("2023-08-01T00:00:00.000+08:00");
-    const endDate = new Date("2023-10-15T00:00:00.000+08:00");
+  const [page, setPage] = useState(0);
 
-    const dummyCheckIns = [];
+  const [loading, setLoading] = useState(false);
 
-    for (let d = startDate; d < endDate; d.setDate(d.getDate() + 1)) {
-      userIds.forEach((userId) => {
-        const rand = Math.random() * 100;
-        let checkIn, checkOut, worksite;
-
-        // No check in (15%)
-        if (rand < 15) return;
-
-        worksite = worksites[Math.floor(Math.random() * worksites.length)];
-
-        if (rand < 85) {
-          // One check in (70%)
-          checkIn = getRandomTime(
-            new Date(d.setHours(6, 0, 0, 0)),
-            new Date(d.setHours(8, 0, 0, 0))
-          );
-          checkOut =
-            rand < 70
-              ? getRandomTime(
-                  new Date(d.setHours(17, 0, 0, 0)),
-                  new Date(d.setHours(19, 0, 0, 0))
-                )
-              : // One check in, no check out (15%)
-                null;
-        } else {
-          // Two check ins (10%)
-          checkIn = getRandomTime(
-            new Date(d.setHours(6, 0, 0, 0)),
-            new Date(d.setHours(8, 0, 0, 0))
-          );
-          checkOut = getRandomTime(
-            new Date(d.setHours(12, 0, 0, 0)),
-            new Date(d.setHours(13, 0, 0, 0))
-          );
-          dummyCheckIns.push({
-            userId: userId,
-            checkInDateTime: checkIn.toISOString(),
-            checkInKey: buildKey(userId, checkIn),
-            checkOutDateTime: checkOut.toISOString(),
-            worksite: worksite,
-          });
-          checkIn = getRandomTime(
-            new Date(d.setHours(13, 0, 0, 0)),
-            new Date(d.setHours(14, 0, 0, 0))
-          );
-          checkOut = getRandomTime(
-            new Date(d.setHours(17, 0, 0, 0)),
-            new Date(d.setHours(19, 0, 0, 0))
-          );
-        }
-
-        dummyCheckIns.push({
-          userId: userId,
-          checkInDateTime: checkIn.toISOString(),
-          checkInKey: buildKey(userId, checkIn),
-          checkOutDateTime: checkOut ? checkOut.toISOString() : null,
-          worksite: worksite,
-        });
-      });
-    }
-
-    dummyCheckIns.sort(
-      (a, b) => new Date(a.checkInDateTime) - new Date(b.checkInDateTime)
-    );
-
-    dummyCheckIns.forEach((checkIn) => {
-      push(recordsRef, checkIn);
-    });
-  };
-
-  const handleGenerate = () => {
+  const handleGenerateData = () => {
     const recordsRef = ref(database, DB_KEY.CHECK_INS);
     get(recordsRef).then((snapshot) => {
       if (snapshot.exists()) {
         console.error("checkIns already contains data");
       } else {
-        generateDummyCheckIns(recordsRef);
+        const dummyCheckIns = generateDummyCheckIns();
+        dummyCheckIns.forEach((checkIn) => {
+          push(recordsRef, checkIn);
+        });
       }
     });
   };
 
+  const fetchUsers = async () => {
+    const profilesRef = ref(database, DB_KEY.PROFILES);
+    const snapshot = await get(query(profilesRef, orderByChild("userId")));
+    let fetchedUsers = [];
+    snapshot.forEach((childSnapshot) => {
+      fetchedUsers.push({
+        userId: childSnapshot.key,
+        ...childSnapshot.val(),
+      });
+    });
+    setUsers(fetchedUsers);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleChangePage = (e, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRoleChange = (userId, newRole) => {
+    setUserRoles((prev) => ({
+      ...prev,
+      [userId]: newRole === "noChange" ? undefined : newRole,
+    }));
+  };
+
+  const handleSaveChanges = async () => {
+    setLoading(true);
+
+    for (const [userId, newRole] of Object.entries(userRoles)) {
+      if (newRole) {
+        const profilesRef = ref(database, DB_KEY.PROFILES);
+        const q = query(profilesRef, orderByChild("userId"), equalTo(userId));
+        const snapshot = await get(q);
+
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            const userKey = childSnapshot.key;
+            const userRef = ref(database, `${DB_KEY.PROFILES}/${userKey}`);
+            update(userRef, { role: newRole });
+          });
+        } else {
+          console.error(`No user found with userId: ${userId}`);
+        }
+      }
+    }
+
+    await fetchUsers();
+    setLoading(false);
+  };
+
   return (
     <Box
+      maxWidth="md"
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -124,9 +117,76 @@ function AdminScreen() {
         mb: 2,
       }}
     >
-      <Button onClick={handleGenerate} variant="contained">
-        Generate dummy check ins
-      </Button>
+      {process.env.NODE_ENV === "development" && (
+        <Button onClick={handleGenerateData} variant="contained">
+          Generate dummy check ins
+        </Button>
+      )}
+      <TablePagination
+        component="div"
+        count={users.length}
+        rowsPerPage={ROWS_PER_PAGE}
+        page={page}
+        onPageChange={handleChangePage}
+        sx={{ width: "100%" }}
+      />
+      <TableContainer
+        component={Paper}
+        sx={{ overflowX: "auto", width: "100%" }}
+      >
+        <Table size="small" sx={{ width: "100%" }}>
+          <TableHead>
+            <TableRow>
+              {["Name", "Role", "New Role"].map((headCell) => (
+                <TableCell key={headCell} sx={{ fontWeight: "bold" }}>
+                  {headCell}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users
+              .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE)
+              .map((user) => (
+                <TableRow key={user.userId}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      size="small"
+                      value={userRoles[user.userId] || "noChange"}
+                      onChange={(e) =>
+                        handleRoleChange(user.userId, e.target.value)
+                      }
+                      sx={{ fontSize: "0.875rem" }}
+                    >
+                      <MenuItem value="noChange">Select...</MenuItem>
+                      <MenuItem value={ROLE.WORKER}>Worker</MenuItem>
+                      <MenuItem value={ROLE.MANAGER}>Manager</MenuItem>
+                      <MenuItem value={ROLE.ADMIN}>Admin</MenuItem>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={Object.values(userRoles).every(
+            (role) => role === undefined
+          )}
+          onClick={handleSaveChanges}
+        >
+          Update Roles
+        </Button>
+      )}
     </Box>
   );
 }

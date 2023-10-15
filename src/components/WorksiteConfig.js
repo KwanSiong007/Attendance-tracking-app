@@ -1,14 +1,24 @@
 import React, { useEffect, useRef } from "react";
+import { ref, push, set } from "firebase/database";
+import { database } from "../firebase";
 import { Container } from "@mui/material";
 import mapboxgl from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
+import DB_KEY from "../constants/dbKey";
+
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
 
 function WorksiteConfig() {
   const mapContainer = useRef(null);
+
+  const writeWorksite = async (worksite) => {
+    const worksitesRef = ref(database, DB_KEY.WORKSITES);
+    const newWorksiteRef = push(worksitesRef);
+    await set(newWorksiteRef, worksite);
+  };
 
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -33,6 +43,22 @@ function WorksiteConfig() {
       defaultMode: "draw_polygon",
     });
     map.addControl(draw);
+
+    map.on("draw.create", async (event) => {
+      try {
+        const name = prompt("Enter a name for this worksite:", "Name");
+        if (name === null) return;
+
+        const worksite = {
+          name: name,
+          coordinates: event.features[0].geometry.coordinates[0],
+        };
+        await writeWorksite(worksite);
+        alert("Worksite saved!");
+      } catch (error) {
+        console.error("Error saving the worksite:", error);
+      }
+    });
   }, []);
 
   return (

@@ -13,7 +13,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Image from "mui-image";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
-import { push, ref, set } from "firebase/database";
+import { ref, push, set } from "firebase/database";
 import { database, storage } from "../firebase";
 import {
   ref as storageRef,

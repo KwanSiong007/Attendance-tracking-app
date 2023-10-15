@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { signIn } from "../api/authentication";
-import { push, ref, set } from "firebase/database";
+import { ref, push, set } from "firebase/database";
 import { database } from "../firebase";
 
 import { useAuth } from "../contexts/AuthContext";

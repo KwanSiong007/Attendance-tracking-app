@@ -9,14 +9,14 @@ import {
 import { point } from "@turf/helpers";
 import { default as findDistance } from "@turf/distance";
 import {
-  push,
   ref,
+  push,
   set,
+  update,
   onValue,
   query,
   orderByChild,
   equalTo,
-  update,
 } from "firebase/database";
 import { database } from "../firebase";
 

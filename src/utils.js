@@ -7,7 +7,6 @@ import {
   startOfDay,
   endOfDay,
   subDays,
-  isStartOfDay,
   isEqual,
 } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";

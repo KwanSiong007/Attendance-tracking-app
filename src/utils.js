@@ -5,8 +5,10 @@ import {
   differenceInMinutes,
   isWithinInterval,
   startOfDay,
-  subDays,
   endOfDay,
+  subDays,
+  isStartOfDay,
+  isEqual,
 } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 import { styled } from "@mui/material/styles";
@@ -81,20 +83,21 @@ export const showTimeDiff = (checkInIso, checkOutIso, nowLoaded) => {
   }
 };
 
-export const isWithinLastWeek = (checkInIso, nowLoaded) => {
-  const checkInDate = utcToZonedTime(parseISO(checkInIso), TIME_ZONE);
-  const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
-  const startDate = startOfDay(subDays(dateLoaded, 6));
-  const endDate = endOfDay(dateLoaded);
-
-  return isWithinInterval(checkInDate, { start: startDate, end: endDate });
-};
-
 export const getLastWeek = (nowLoaded) => {
   const dateLoaded = utcToZonedTime(nowLoaded, TIME_ZONE);
-  const startDate = startOfDay(subDays(dateLoaded, 6));
+  let startDate = startOfDay(subDays(dateLoaded, 6));
 
-  return [startDate, dateLoaded];
+  if (isEqual(dateLoaded, startOfDay(dateLoaded))) {
+    startDate = startOfDay(subDays(dateLoaded, 7));
+  }
+  return [startDate, endOfDay(dateLoaded)];
+};
+
+export const isWithinLastWeek = (checkInIso, nowLoaded) => {
+  const checkInDate = utcToZonedTime(parseISO(checkInIso), TIME_ZONE);
+  const [startDate, endDate] = getLastWeek(nowLoaded);
+
+  return isWithinInterval(checkInDate, { start: startDate, end: endDate });
 };
 
 const getRandomTime = (start, end) => {
@@ -119,8 +122,8 @@ export const generateDummyCheckIns = () => {
     "inkSeiy27ve5WGxH43rPIKCGCzl2",
   ];
   const worksites = ["Bedok", "Jurong West", "Novena", "Woodlands"];
-  const startDate = new Date("2023-08-01T00:00:00.000+08:00");
-  const endDate = new Date("2023-10-17T00:00:00.000+08:00");
+  const startDate = new Date("2023-10-17T00:00:00.000+08:00");
+  const endDate = new Date("2023-10-18T00:00:00.000+08:00");
 
   const dummyCheckIns = [];
 

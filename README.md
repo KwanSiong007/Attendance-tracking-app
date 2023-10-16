@@ -7,7 +7,9 @@ Try it out [**here**](https://kwansiong007.github.io/Attendance-tracking-app/)! 
 ## Technologies Used
 
 - React with [Create React App](https://create-react-app.dev/)
-- [Material UI](https://mui.com/material-ui/) for UI components
 - [Firebase](https://firebase.google.com/products-build) Realtime Database, Storage, and Authentication
+- [Material UI](https://mui.com/material-ui/) for UI components
+- [Nivo](https://nivo.rocks/) for data visualisation
+- [Mapbox GL JS](https://www.mapbox.com/mapbox-gljs) and [Mapbox Draw](https://github.com/mapbox/mapbox-gl-draw) for interactive map
 - [Turf](https://turfjs.org/) for distance calculation
 - [date-fns](https://date-fns.org/) for date manipulation

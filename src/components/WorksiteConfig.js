@@ -63,7 +63,7 @@ function WorksiteConfig() {
     }
     const draw = drawRef.current;
 
-    mapRef.current.on("load", () => {
+    map.on("load", () => {
       map.addSource("worksites", {
         type: "geojson",
         data: {
@@ -98,7 +98,6 @@ function WorksiteConfig() {
 
       onChildAdded(worksitesRef, (snapshot) => {
         console.log("onChildAdded run");
-        const map = mapRef.current;
         const worksite = snapshot.val();
 
         const feature = {
@@ -121,7 +120,6 @@ function WorksiteConfig() {
 
       onChildRemoved(worksitesRef, (snapshot) => {
         console.log("onChildRemoved run");
-        const map = mapRef.current;
 
         const data = map.getSource("worksites")._data;
         data.features = data.features.filter(
@@ -140,8 +138,6 @@ function WorksiteConfig() {
 
       onChildChanged(worksitesRef, (snapshot) => {
         console.log("onChildChanged run");
-        const map = mapRef.current;
-        console.log(mapRef.current);
         const worksite = snapshot.val();
 
         const data = map.getSource("worksites")._data;
@@ -172,7 +168,6 @@ function WorksiteConfig() {
     });
 
     const handleWorksiteClick = (e) => {
-      const map = mapRef.current;
       const clickedFeature = e.features[0];
 
       clickedFeature.id = clickedFeature.properties.firebaseId;
@@ -252,7 +247,6 @@ function WorksiteConfig() {
     });
 
     return () => {
-      const map = mapRef.current;
       map.off("load");
       map.off("click", "worksite-fill", handleWorksiteClick);
       map.off("mouseenter", "worksite-fill");

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ref,
   push,
@@ -26,6 +26,8 @@ function WorksiteConfig() {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const drawRef = useRef(null);
+
+  const [drawLayersLoaded, setDrawLayersLoaded] = useState(false);
 
   const writeWorksite = async (worksite) => {
     console.log("writeWorksite run");
@@ -167,31 +169,46 @@ function WorksiteConfig() {
       };
     });
 
-    const handleWorksiteClick = (e) => {
+    map.on("click", "worksite-fill", function (e) {
       const clickedFeature = e.features[0];
-
-      clickedFeature.id = clickedFeature.properties.firebaseId;
       draw.add(clickedFeature);
+      setDrawLayersLoaded(true);
 
       const data = map.getSource("worksites")._data;
       data.features = data.features.filter(
-        (f) => f.properties.firebaseId !== clickedFeature.id
+        (f) => f.properties.firebaseId !== clickedFeature.properties.firebaseId
       );
       map.getSource("worksites").setData(data);
 
       draw.changeMode("simple_select", {
-        featureId: clickedFeature.id,
+        featureId: clickedFeature.properties.firebaseId,
       });
-    };
+    });
 
-    map.on("click", "worksite-fill", handleWorksiteClick);
+    let popup;
 
-    map.on("mouseenter", "worksite-fill", () => {
+    map.on("mouseenter", "worksite-fill", function (e) {
       map.getCanvas().style.cursor = "pointer";
+
+      const name = e.features[0].properties.name;
+
+      popup = new mapboxgl.Popup({ closeButton: false })
+        .setLngLat(e.lngLat)
+        .setHTML(name)
+        .addTo(map);
+    });
+
+    map.on("mousemove", "worksite-fill", function (e) {
+      if (popup) {
+        popup.setLngLat(e.lngLat);
+      }
     });
 
     map.on("mouseleave", "worksite-fill", () => {
       map.getCanvas().style.cursor = "";
+      if (popup) {
+        popup.remove();
+      }
     });
 
     map.on("draw.create", async (e) => {
@@ -248,7 +265,7 @@ function WorksiteConfig() {
 
     return () => {
       map.off("load");
-      map.off("click", "worksite-fill", handleWorksiteClick);
+      map.off("click", "worksite-fill");
       map.off("mouseenter", "worksite-fill");
       map.off("mouseleave", "worksite-fill");
       map.off("draw.create");
@@ -257,6 +274,52 @@ function WorksiteConfig() {
       map.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (drawLayersLoaded) {
+      const map = mapRef.current;
+      const draw = drawRef.current;
+
+      let popup;
+
+      const layers = map.getStyle().layers;
+      const drawLayers = layers.filter(
+        (layer) =>
+          layer.type === "fill" &&
+          ["mapbox-gl-draw-hot", "mapbox-gl-draw-cold"].includes(layer.source)
+      );
+
+      drawLayers.forEach((layer) => {
+        map.on("mouseenter", layer.id, function (e) {
+          map.getCanvas().style.cursor = "pointer";
+          const featureId = e.features[0].properties.id;
+
+          const fullFeature = draw
+            .getAll()
+            .features.find((f) => f.id === featureId);
+          if (fullFeature) {
+            popup = new mapboxgl.Popup({ closeButton: false })
+              .setLngLat(e.lngLat)
+              .setHTML(fullFeature.properties.name)
+              .addTo(map);
+          }
+        });
+
+        map.on("mousemove", layer.id, function (e) {
+          if (popup) {
+            popup.setLngLat(e.lngLat);
+          }
+        });
+
+        map.on("mouseleave", layer.id, () => {
+          map.getCanvas().style.cursor = "";
+          if (popup) {
+            popup.remove();
+          }
+        });
+      });
+    }
+  }, [drawLayersLoaded]);
 
   return (
     <Container maxWidth="lg" sx={{ width: "100vw" }}>

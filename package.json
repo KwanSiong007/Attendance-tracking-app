@@ -12,6 +12,7 @@
     "@nivo/line": "^0.83.0",
     "@nivo/pie": "^0.83.0",
     "@nivo/tooltip": "^0.83.0",
+    "@turf/boolean-point-in-polygon": "^6.5.0",
     "@turf/distance": "^6.5.0",
     "@turf/helpers": "^6.5.0",
     "@wojtekmaj/react-daterange-picker": "^5.4.3",

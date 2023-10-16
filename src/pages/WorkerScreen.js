@@ -7,16 +7,17 @@ import {
   Typography,
 } from "@mui/material";
 import { point } from "@turf/helpers";
-import { default as findDistance } from "@turf/distance";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import {
-  push,
   ref,
+  push,
   set,
-  onValue,
+  update,
+  get,
   query,
   orderByChild,
   equalTo,
-  update,
+  onValue,
 } from "firebase/database";
 import { database } from "../firebase";
 
@@ -47,6 +48,8 @@ function WorkerScreen({ workerId }) {
   const [nowLoaded, setNowLoaded] = useState(null);
   const [currDate, setCurrDate] = useState("");
 
+  const [worksites, setWorksites] = useState([]);
+
   const [attendance, setAttendance] = useState([]);
   const [attendanceStatus, setAttendanceStatus] = useState(
     ATTENDANCE_STATUS.LOADING
@@ -56,6 +59,23 @@ function WorkerScreen({ workerId }) {
 
   const [gpsStatus, setGpsStatus] = useState(GPS_STATUS.OFF);
   const [gpsSite, setGpsSite] = useState(null);
+
+  useEffect(() => {
+    const fetchWorksites = async () => {
+      const worksitesRef = ref(database, DB_KEY.WORKSITES);
+      const snapshot = await get(worksitesRef);
+      let fetchedWorksites = [];
+      snapshot.forEach((childSnapshot) => {
+        const row = childSnapshot.val();
+        fetchedWorksites.push({
+          name: row.name,
+          coordinates: row.coordinates,
+        });
+      });
+      setWorksites(fetchedWorksites);
+    };
+    fetchWorksites();
+  }, []);
 
   useEffect(() => {
     const nowLoaded = new Date();
@@ -106,46 +126,21 @@ function WorkerScreen({ workerId }) {
     return () => unsubscribe();
   }, [workerId]);
 
-  const sites = [
-    {
-      name: "Jurong",
-      coordinates: { lat: 1.3334577950596898, lng: 103.74222501072371 },
-      radius: 1,
-    },
-    {
-      name: "Paya Lebar",
-      coordinates: { lat: 1.3183859445834136, lng: 103.89305776654058 },
-      radius: 1,
-    },
-    {
-      name: "Tanjong Pagar",
-      coordinates: { lat: 1.276650525561771, lng: 103.845886249542 },
-      radius: 1,
-    },
-    {
-      name: "Woodlands",
-      coordinates: { lat: 1.437147546683729, lng: 103.78643347255546 },
-      radius: 1,
-    },
-    {
-      name: "Singapore", // for debugging
-      coordinates: { lat: 1.283333, lng: 103.833333 },
-      radius: 99999,
-    },
-    // ...other sites
-  ];
+  const checkLocation = (lng, lat) => {
+    const userPoint = point([lng, lat]);
 
-  const checkLocation = (lat, lng) => {
-    const userPoint = point([lat, lng]);
-    for (let site of sites) {
-      const sitePoint = point([site.coordinates.lat, site.coordinates.lng]);
-      const distance = findDistance(userPoint, sitePoint);
-      // console.log(`Distance of ${distance} km from ${site.name}.`);
-      if (distance < site.radius) {
+    for (let site of worksites) {
+      const siteArea = {
+        type: "Polygon",
+        coordinates: [site.coordinates],
+      };
+
+      if (booleanPointInPolygon(userPoint, siteArea)) {
         setGpsSite(site.name);
         return site;
       }
     }
+
     setGpsSite(null);
     return null;
   };
@@ -169,8 +164,8 @@ function WorkerScreen({ workerId }) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setGpsStatus(GPS_STATUS.ON);
-          const { latitude, longitude } = position.coords;
-          const site = checkLocation(latitude, longitude);
+          const { longitude, latitude } = position.coords;
+          const site = checkLocation(longitude, latitude);
           resolve(site);
         },
         (error) => {
@@ -293,12 +288,14 @@ function WorkerScreen({ workerId }) {
         {attendanceStatus !== ATTENDANCE_STATUS.LOADING ? (
           <>
             <Typography>{attendanceMsg()}</Typography>
-            {attendanceStatus === ATTENDANCE_STATUS.CHECKED_OUT ? (
+            {worksites.length &&
+            attendanceStatus === ATTENDANCE_STATUS.CHECKED_OUT ? (
               <WorkerButton
                 buttonType={WORKER_BUTTON_TYPE.CHECK_IN}
                 handleHold={handleCheckIn}
               />
-            ) : attendanceStatus === ATTENDANCE_STATUS.CHECKED_IN ? (
+            ) : worksites.length &&
+              attendanceStatus === ATTENDANCE_STATUS.CHECKED_IN ? (
               <WorkerButton
                 buttonType={WORKER_BUTTON_TYPE.CHECK_OUT}
                 handleHold={handleCheckOut}

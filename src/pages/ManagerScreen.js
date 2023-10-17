@@ -69,7 +69,6 @@ function ManagerScreen() {
             Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
         );
 
-        console.log(sortedAttendance);
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
 

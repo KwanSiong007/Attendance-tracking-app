@@ -97,8 +97,6 @@ function HomeScreen() {
   if (loadingAuth) {
     return <CircularProgress sx={{ mt: 5 }} />;
   } else if (user) {
-    console.log(user);
-    console.log(user.photoUrl);
     return (
       <>
         <AppBar position="static">

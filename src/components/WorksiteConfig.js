@@ -30,7 +30,6 @@ function WorksiteConfig() {
   const [drawLayersLoaded, setDrawLayersLoaded] = useState(false);
 
   const writeWorksite = async (worksite) => {
-    console.log("writeWorksite run");
     const worksitesRef = ref(database, DB_KEY.WORKSITES);
     const newWorksiteRef = push(worksitesRef);
     await set(newWorksiteRef, worksite);
@@ -99,7 +98,6 @@ function WorksiteConfig() {
       const worksitesRef = ref(database, DB_KEY.WORKSITES);
 
       onChildAdded(worksitesRef, (snapshot) => {
-        console.log("onChildAdded run");
         const worksite = snapshot.val();
 
         const feature = {
@@ -121,8 +119,6 @@ function WorksiteConfig() {
       });
 
       onChildRemoved(worksitesRef, (snapshot) => {
-        console.log("onChildRemoved run");
-
         const data = map.getSource("worksites")._data;
         data.features = data.features.filter(
           (f) => f.properties.firebaseId !== snapshot.key
@@ -139,7 +135,6 @@ function WorksiteConfig() {
       });
 
       onChildChanged(worksitesRef, (snapshot) => {
-        console.log("onChildChanged run");
         const worksite = snapshot.val();
 
         const data = map.getSource("worksites")._data;
@@ -212,7 +207,6 @@ function WorksiteConfig() {
     });
 
     map.on("draw.create", async (e) => {
-      console.log("on draw.create run");
       try {
         const feature = e.features[0];
         const name = prompt("Enter a name for this worksite:", "Name");
@@ -225,7 +219,6 @@ function WorksiteConfig() {
         };
 
         await writeWorksite(worksite);
-        console.log("Worksite added in Firebase.");
 
         draw.delete(feature.id);
       } catch (error) {
@@ -234,7 +227,6 @@ function WorksiteConfig() {
     });
 
     map.on("draw.update", async (e) => {
-      console.log("on draw.update run");
       try {
         const feature = e.features[0];
         const worksitesRef = ref(database, DB_KEY.WORKSITES);
@@ -243,21 +235,18 @@ function WorksiteConfig() {
         await update(worksiteRef, {
           coordinates: feature.geometry.coordinates[0],
         });
-        console.log("Worksite updated in Firebase.");
       } catch (error) {
         console.error("Error updating the worksite:", error);
       }
     });
 
     map.on("draw.delete", async (e) => {
-      console.log("on draw.delete run");
       try {
         const feature = e.features[0];
         const worksitesRef = ref(database, DB_KEY.WORKSITES);
         const worksiteRef = child(worksitesRef, feature.properties.firebaseId);
 
         await remove(worksiteRef);
-        console.log("Worksite deleted from Firebase.");
       } catch (error) {
         console.error("Error deleting the worksite:", error);
       }

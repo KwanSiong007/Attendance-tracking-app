@@ -53,10 +53,9 @@ function Register() {
 
   const registerUser = async () => {
     try {
-      // Check if password and confirm password match
       if (state.password !== state.confirmPassword) {
         setConfirmPasswordError(true);
-        return; // Don't proceed with registration
+        return;
       }
 
       const user = await register(state.email, state.password);
@@ -83,7 +82,6 @@ function Register() {
         userId: user.uid,
         role: ROLE.WORKER,
       };
-      // console.log("profile:", profile);
       const profileRef = ref(database, DB_KEY.PROFILES);
       const newProfileRef = push(profileRef);
       set(newProfileRef, profile);
@@ -96,16 +94,11 @@ function Register() {
         photo: null,
         confirmPassword: "",
       });
-      // console.log("User registered:", user);
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(`Error at register: ${errorCode} ${errorMessage}`);
+      console.error("Error registering:", error);
     }
   };
 
-  //The handleChange function is called whenever the password field changes, and it checks if the password length is less than 8 characters.
-  //If it's less than 8 characters, it sets passwordError to true, which triggers an error message below the password field.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setState({
@@ -125,7 +118,7 @@ function Register() {
   };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0]; // Get the first selected file
+    const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
 
@@ -137,7 +130,6 @@ function Register() {
     }
   };
 
-  //The error prop in the password TextField is set to passwordError, which will make the field turn red and display the error message when passwordError is true.
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />

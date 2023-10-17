@@ -158,7 +158,7 @@ function WorkerScreen({ workerId }) {
           resolve(site);
         },
         (error) => {
-          console.error(error);
+          console.error("Error getting location:", error);
           if (error.code === 1) {
             setGpsStatus(GPS_STATUS.DENIED);
           } else {
@@ -196,7 +196,7 @@ function WorkerScreen({ workerId }) {
         setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_OUT);
       }
     } catch (error) {
-      console.error(`Location retrieval failed: ${error.message}`);
+      console.error("Error retrieving location:", error);
       setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_OUT);
     }
   };
@@ -220,7 +220,7 @@ function WorkerScreen({ workerId }) {
         setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_IN);
       }
     } catch (error) {
-      console.error(`Location retrieval failed: ${error.message}`);
+      console.error("Error retrieving location:", error);
       setAttendanceStatus(ATTENDANCE_STATUS.CHECKED_IN);
     }
   };

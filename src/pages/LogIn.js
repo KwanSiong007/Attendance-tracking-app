@@ -57,7 +57,7 @@ function LogIn() {
           setError("Network request failed. Please try again.");
           break;
         default:
-          console.error(error);
+          console.error("Error logging in:", error);
       }
     } finally {
       setLoggingIn(false);

@@ -1,6 +1,6 @@
 # Attendance Tracker
 
-_Attendance Tracker_ is a full-stack web app for workers to check in and out at worksites. The app caters for different user roles:
+_Attendance Tracker_ is a full-stack web app for workers to check in and out at worksites, catering for different user roles:
 - _Worker:_ Can check in or out. Geolocation is used to confirm that they are within the worksite area.
 - _Manager:_ Can view check in logs and a dashboard of workers' locations and past attendance.
 - _Admin:_ Can assign user roles and add, remove, or edit worksites on an interactive map.

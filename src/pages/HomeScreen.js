@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Popover,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { reAuth, logOut } from "../api/authentication";
 import { ref, query, orderByChild, equalTo, get } from "firebase/database";
@@ -39,6 +48,7 @@ const theme = createTheme({
 function HomeScreen() {
   const { user, setUser, loadingAuth } = useAuth();
   const [role, setRole] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     const checkIfLoggedIn = (user) => {
@@ -71,31 +81,73 @@ function HomeScreen() {
     await logOut();
     setUser(null);
     setRole("");
+    handlePopoverClose();
   };
+
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   if (loadingAuth) {
     return <CircularProgress sx={{ mt: 5 }} />;
   } else if (user) {
+    console.log(user);
+    console.log(user.photoUrl);
     return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          mt: 4,
-          gap: 2,
-        }}
-      >
-        <Typography variant="h4">Welcome, {user.displayName}!</Typography>
-        <ThemeProvider theme={theme}>
-          {role === ROLE.WORKER && <WorkerScreen workerId={user.uid} />}
-          {role === ROLE.MANAGER && <ManagerScreen />}
-          {role === ROLE.ADMIN && <AdminScreen />}
-        </ThemeProvider>
-        <Button onClick={handleSignOut} variant="outlined" sx={{ mb: 4 }}>
-          Sign Out
-        </Button>
-      </Box>
+      <>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" style={{ flexGrow: 1 }}>
+              Attendance Tracker
+            </Typography>
+            <Typography variant="body1" style={{ marginRight: 10 }}>
+              {user.displayName}
+            </Typography>
+            <Avatar
+              src={user.photoURL}
+              onClick={handleAvatarClick}
+              style={{ cursor: "pointer" }}
+              variant="square"
+            ></Avatar>
+            <Popover
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "center",
+              }}
+            >
+              <Button onClick={handleSignOut}>Sign Out</Button>
+            </Popover>
+          </Toolbar>
+        </AppBar>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 4,
+            gap: 2,
+          }}
+        >
+          <ThemeProvider theme={theme}>
+            {role === ROLE.WORKER && <WorkerScreen workerId={user.uid} />}
+            {role === ROLE.MANAGER && <ManagerScreen />}
+            {role === ROLE.ADMIN && <AdminScreen />}
+          </ThemeProvider>
+        </Box>
+      </>
     );
   } else {
     return <Navigate to="/log-in" replace />;

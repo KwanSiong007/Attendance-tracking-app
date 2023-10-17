@@ -1,8 +1,13 @@
 # Attendance Tracker
 
-_Attendance Tracker_ is a full-stack web app for workers to check in and out at worksites. It uses geolocation to confirm that workers are at a worksite, and includes an attendance dashboard for managers. This app was built by [Kwan Siong](https://github.com/KwanSiong007) and [Cheng Wai](https://github.com/chengwaikoo) as [Project 2](https://bootcamp.rocketacademy.co/2-full-stack/2.p-full-stack-app-firebase) for the [Rocket Academy Coding Bootcamp](https://www.rocketacademy.co/courses/coding-bootcamp).
+_Attendance Tracker_ is a full-stack web app for workers to check in and out at worksites, catering for different user roles:
+- _Worker:_ Can check in or out. Geolocation is used to confirm that they are within the worksite area.
+- _Manager:_ Can view check in logs and a dashboard of workers' locations and past attendance.
+- _Admin:_ Can assign user roles and add, remove, or edit worksites on an interactive map.
 
-Try it out [**here**](https://kwansiong007.github.io/Attendance-tracking-app/)! Click on "Register" to create a worker's account.
+This app was built by [Kwan Siong](https://github.com/KwanSiong007) and [Cheng Wai](https://github.com/chengwaikoo) as [Project 2](https://bootcamp.rocketacademy.co/2-full-stack/2.p-full-stack-app-firebase) for the [Rocket Academy Coding Bootcamp](https://www.rocketacademy.co/courses/coding-bootcamp).
+
+Try it out [**here**](https://kwansiong007.github.io/Attendance-tracking-app/)! Click on "Register" to create a worker account.
 
 ## Technologies Used
 

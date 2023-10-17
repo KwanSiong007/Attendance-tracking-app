@@ -61,7 +61,7 @@ function ManagerScreen() {
 
         snapshot.forEach((childSnapshot) => {
           const row = childSnapshot.val();
-          attendance.push({ ...row, userId: childSnapshot.key });
+          attendance.push(row);
         });
 
         const sortedAttendance = [...attendance].sort(
@@ -69,6 +69,7 @@ function ManagerScreen() {
             Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
         );
 
+        console.log(sortedAttendance);
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
 

@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ref,
-  push,
-  update,
-  query,
-  orderByChild,
-  equalTo,
-  get,
-} from "firebase/database";
+import { ref, push, update, get } from "firebase/database";
 import { database } from "../firebase";
 import {
   Box,

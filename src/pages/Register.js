@@ -13,7 +13,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Image from "mui-image";
 import { register } from "../api/authentication";
 import { updateProfile } from "firebase/auth";
-import { ref, push, set } from "firebase/database";
+import { ref, set } from "firebase/database";
 import { database, storage } from "../firebase";
 import {
   ref as storageRef,
@@ -79,12 +79,10 @@ function Register() {
         name: state.name,
         email: state.email,
         photoUrl: photoUrl,
-        userId: user.uid,
         role: ROLE.WORKER,
       };
-      const profileRef = ref(database, DB_KEY.PROFILES);
-      const newProfileRef = push(profileRef);
-      set(newProfileRef, profile);
+      const profileRef = ref(database, `${DB_KEY.PROFILES}/${user.uid}`);
+      set(profileRef, profile);
 
       showSuccessMessage();
       setState({

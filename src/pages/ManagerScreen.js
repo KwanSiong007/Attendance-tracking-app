@@ -69,6 +69,7 @@ function ManagerScreen() {
             Date.parse(b.checkInDateTime) - Date.parse(a.checkInDateTime)
         );
 
+        console.log(sortedAttendance);
         setAttendance(sortedAttendance);
         setFilteredAttendance(sortedAttendance);
 
@@ -100,7 +101,7 @@ function ManagerScreen() {
 
         snapshot.forEach((childSnapshot) => {
           const row = childSnapshot.val();
-          profiles[row.userId] = {
+          profiles[childSnapshot.key] = {
             name: row.name,
             role: row.role,
             photoUrl: row.photoUrl,

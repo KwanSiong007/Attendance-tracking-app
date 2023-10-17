@@ -121,7 +121,7 @@ export const generateDummyCheckIns = () => {
     "inkSeiy27ve5WGxH43rPIKCGCzl2",
   ];
   const worksites = ["Bedok", "Jurong West", "Novena", "Woodlands"];
-  const startDate = new Date("2023-10-17T00:00:00.000+08:00");
+  const startDate = new Date("2023-08-01T00:00:00.000+08:00");
   const endDate = new Date("2023-10-18T00:00:00.000+08:00");
 
   const dummyCheckIns = [];

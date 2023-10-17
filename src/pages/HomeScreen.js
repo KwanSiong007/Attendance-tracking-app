@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { reAuth, logOut } from "../api/authentication";
-import { ref, query, orderByChild, equalTo, get } from "firebase/database";
+import { ref, get } from "firebase/database";
 import { database } from "../firebase";
 
 import { useAuth } from "../contexts/AuthContext";
@@ -62,14 +62,11 @@ function HomeScreen() {
 
   useEffect(() => {
     const fetchRole = async () => {
-      const profilesRef = ref(database, DB_KEY.PROFILES);
-      const q = query(profilesRef, orderByChild("userId"), equalTo(user.uid));
-      const snapshot = await get(q);
+      const profileRef = ref(database, `${DB_KEY.PROFILES}/${user.uid}`);
+      const snapshot = await get(profileRef);
 
-      snapshot.forEach((childSnapshot) => {
-        const profile = childSnapshot.val();
-        setRole(profile.role);
-      });
+      const profile = snapshot.val();
+      setRole(profile.role);
     };
 
     if (user) {

@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ref,
-  push,
-  update,
-  query,
-  orderByChild,
-  equalTo,
-  get,
-} from "firebase/database";
+import { ref, push, update, get } from "firebase/database";
 import { database } from "../firebase";
 import {
   Box,
@@ -66,7 +58,8 @@ function AdminScreen() {
 
   const fetchUsers = async () => {
     const profilesRef = ref(database, DB_KEY.PROFILES);
-    const snapshot = await get(query(profilesRef, orderByChild("userId")));
+    const snapshot = await get(profilesRef);
+
     let fetchedUsers = [];
     snapshot.forEach((childSnapshot) => {
       fetchedUsers.push({
@@ -89,24 +82,14 @@ function AdminScreen() {
     setLoading(true);
 
     try {
-      const profilesRef = ref(database, DB_KEY.PROFILES);
+      const profileRef = ref(database, `${DB_KEY.PROFILES}/${userId}`);
+      await update(profileRef, { role: newRole });
 
-      const q = query(profilesRef, orderByChild("userId"), equalTo(userId));
-      const snapshot = await get(q);
-
-      if (snapshot.exists()) {
-        const userKey = Object.keys(snapshot.val())[0];
-        const userRef = ref(database, `${DB_KEY.PROFILES}/${userKey}`);
-        await update(userRef, { role: newRole });
-
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.userId === userId ? { ...user, role: newRole } : user
-          )
-        );
-      } else {
-        console.error(`No user found with userId: ${userId}`);
-      }
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userId === userId ? { ...user, role: newRole } : user
+        )
+      );
     } catch (error) {
       console.error("Error updating role:", error);
     } finally {

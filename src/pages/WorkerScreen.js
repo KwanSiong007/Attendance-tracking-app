@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -21,28 +21,15 @@ import {
 } from "firebase/database";
 import { database } from "../firebase";
 
-import WorkerAttendance from "../components/WorkerAttendance";
 import WorkerButton from "../components/WorkerButton";
+import WorkerAttendance from "../components/WorkerAttendance";
+import WorkerMap from "../components/WorkerMap";
+
 import { showCurrDate, buildKey } from "../utils";
 import DB_KEY from "../constants/dbKey";
 import WORKER_BUTTON_TYPE from "../constants/workerButtonType";
-
-const ATTENDANCE_STATUS = {
-  LOADING: "loading",
-  CHECKED_IN: "checkedIn",
-  CHECKED_OUT: "checkedOut",
-  CHECKING_IN: "checkingIn",
-  CHECKING_OUT: "checkingOut",
-};
-
-const GPS_STATUS = {
-  OFF: "off",
-  REQUESTING: "requesting",
-  ON: "on",
-  NOT_SUPPORTED: "notSupported",
-  DENIED: "denied",
-  ERROR: "error",
-};
+import ATTENDANCE_STATUS from "../constants/attendanceStatus";
+import GPS_STATUS from "../constants/gpsStatus";
 
 function WorkerScreen({ workerId }) {
   const [nowLoaded, setNowLoaded] = useState(null);
@@ -58,6 +45,7 @@ function WorkerScreen({ workerId }) {
   const [recordId, setRecordId] = useState(null);
 
   const [gpsStatus, setGpsStatus] = useState(GPS_STATUS.OFF);
+  const [location, setLocation] = useState(null);
   const [gpsSite, setGpsSite] = useState(null);
 
   useEffect(() => {
@@ -165,6 +153,7 @@ function WorkerScreen({ workerId }) {
         (position) => {
           setGpsStatus(GPS_STATUS.ON);
           const { longitude, latitude } = position.coords;
+          setLocation({ lng: longitude, lat: latitude });
           const site = checkLocation(longitude, latitude);
           resolve(site);
         },
@@ -236,29 +225,6 @@ function WorkerScreen({ workerId }) {
     }
   };
 
-  const gpsStatusMsg = () => {
-    switch (gpsStatus) {
-      case GPS_STATUS.REQUESTING:
-        return "Requesting location access.";
-      case GPS_STATUS.ON:
-        if (!gpsSite) {
-          return "Your current location is not at a work site.";
-        } else if (checkedInSite && gpsSite !== checkedInSite) {
-          return `Your current location is ${gpsSite}. You must check out from ${checkedInSite}.`;
-        } else {
-          return `Your current location is ${gpsSite}.`;
-        }
-      case GPS_STATUS.NOT_SUPPORTED:
-        return "Location access not supported. Please use a compatible browser.";
-      case GPS_STATUS.DENIED:
-        return "Location access denied. Please grant access to confirm you're at a work site.";
-      case GPS_STATUS.ERROR:
-        return "Location access error. Please contact support.";
-      default:
-        return;
-    }
-  };
-
   const attendanceMsg = () => {
     switch (attendanceStatus) {
       case ATTENDANCE_STATUS.CHECKED_IN:
@@ -281,46 +247,84 @@ function WorkerScreen({ workerId }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
+          gap: 4,
           mb: 2,
         }}
       >
         {attendanceStatus !== ATTENDANCE_STATUS.LOADING ? (
           <>
-            <Typography>{attendanceMsg()}</Typography>
-            {worksites.length &&
-            attendanceStatus === ATTENDANCE_STATUS.CHECKED_OUT ? (
-              <WorkerButton
-                buttonType={WORKER_BUTTON_TYPE.CHECK_IN}
-                handleHold={handleCheckIn}
-              />
-            ) : worksites.length &&
-              attendanceStatus === ATTENDANCE_STATUS.CHECKED_IN ? (
-              <WorkerButton
-                buttonType={WORKER_BUTTON_TYPE.CHECK_OUT}
-                handleHold={handleCheckOut}
-              />
-            ) : (
-              <Button
-                variant="contained"
-                disabled
+            <Box
+              width="100%"
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "stretch", sm: "center" },
+                justifyContent: "center",
+                gap: { xs: 4, sm: 6 },
+              }}
+            >
+              <Box
                 sx={{
-                  borderRadius: "50%",
-                  width: "160px",
-                  height: "160px",
-                  fontSize: "h5.fontSize",
-                  lineHeight: "1.5",
-                  textTransform: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 2,
+                  ml: 3,
                 }}
               >
-                Loading...
-              </Button>
-            )}
-            <Typography>{gpsStatusMsg()}</Typography>
-            <Typography sx={{ alignSelf: "flex-start" }}>
-              Showing your check ins today ({currDate}):
-            </Typography>
-            <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
+                <Typography>{attendanceMsg()}</Typography>
+                {worksites.length &&
+                attendanceStatus === ATTENDANCE_STATUS.CHECKED_OUT ? (
+                  <WorkerButton
+                    buttonType={WORKER_BUTTON_TYPE.CHECK_IN}
+                    handleHold={handleCheckIn}
+                  />
+                ) : worksites.length &&
+                  attendanceStatus === ATTENDANCE_STATUS.CHECKED_IN ? (
+                  <WorkerButton
+                    buttonType={WORKER_BUTTON_TYPE.CHECK_OUT}
+                    handleHold={handleCheckOut}
+                  />
+                ) : (
+                  <Button
+                    variant="contained"
+                    disabled
+                    sx={{
+                      borderRadius: "50%",
+                      width: "160px",
+                      height: "160px",
+                      fontSize: "h5.fontSize",
+                      lineHeight: "1.5",
+                      textTransform: "none",
+                    }}
+                  >
+                    Loading...
+                  </Button>
+                )}
+              </Box>
+              <WorkerMap
+                worksites={worksites}
+                location={location}
+                gpsStatus={gpsStatus}
+                gpsSite={gpsSite}
+                checkedInSite={checkedInSite}
+                attendanceStatus={attendanceStatus}
+              />
+            </Box>
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <Typography sx={{ alignSelf: "flex-start" }}>
+                Showing your check ins today ({currDate}):
+              </Typography>
+              <WorkerAttendance attendance={attendance} nowLoaded={nowLoaded} />
+            </Box>
           </>
         ) : (
           <CircularProgress />

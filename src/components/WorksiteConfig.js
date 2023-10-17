@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ref,
   push,
@@ -50,8 +50,8 @@ function WorksiteConfig() {
 
     map.fitBounds([
       // Bounding box is [103.6059, 1.1644], [104.0839, 1.4705]
-      [103.5659, 1.1644],
-      [104.0739, 1.4705],
+      [103.5659, 1.1844],
+      [104.0739, 1.4905],
     ]);
 
     if (!drawRef.current) {
@@ -325,7 +325,11 @@ function WorksiteConfig() {
     <Container maxWidth="lg" sx={{ width: "100vw" }}>
       <div
         ref={mapContainer}
-        style={{ width: "100%", height: "calc(100vh - 325px)" }}
+        style={{
+          width: "100%",
+          height: "calc(100vh - 325px)",
+          borderRadius: "4px",
+        }}
       ></div>
     </Container>
   );

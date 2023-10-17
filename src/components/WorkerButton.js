@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Button, CircularProgress } from "@mui/material";
 
 import WORKER_BUTTON_TYPE from "../constants/workerButtonType";

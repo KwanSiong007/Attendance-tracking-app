@@ -45,7 +45,7 @@ function WorksitePie({ workerCount, countsByWorksite }) {
     tooltip: CustomTooltip,
     colors: (d) => {
       if (d.id === "Not at worksite") {
-        return "grey";
+        return "gray";
       } else {
         const id = pieData.findIndex((p) => p.id === d.id);
         return schemeSet2[id % schemeSet2.length];

@@ -148,6 +148,7 @@ function AdminScreen() {
               </TableHead>
               <TableBody>
                 {users
+                  .sort((a, b) => a.name.localeCompare(b.name))
                   .slice(
                     page * ROWS_PER_PAGE,
                     page * ROWS_PER_PAGE + ROWS_PER_PAGE

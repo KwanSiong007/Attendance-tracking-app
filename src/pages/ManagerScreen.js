@@ -61,7 +61,7 @@ function ManagerScreen() {
 
         snapshot.forEach((childSnapshot) => {
           const row = childSnapshot.val();
-          attendance.push(row);
+          attendance.push({ ...row, userId: childSnapshot.key });
         });
 
         const sortedAttendance = [...attendance].sort(
@@ -100,7 +100,7 @@ function ManagerScreen() {
 
         snapshot.forEach((childSnapshot) => {
           const row = childSnapshot.val();
-          profiles[row.userId] = {
+          profiles[childSnapshot.key] = {
             name: row.name,
             role: row.role,
             photoUrl: row.photoUrl,

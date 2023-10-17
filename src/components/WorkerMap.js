@@ -84,6 +84,32 @@ function WorkerMap({
         map.getSource("worksites").setData(data);
       }
     });
+
+    let popup;
+
+    map.on("mouseenter", "worksite-fill", function (e) {
+      map.getCanvas().style.cursor = "pointer";
+
+      const name = e.features[0].properties.name;
+
+      popup = new mapboxgl.Popup({ closeButton: false })
+        .setLngLat(e.lngLat)
+        .setHTML(name)
+        .addTo(map);
+    });
+
+    map.on("mousemove", "worksite-fill", function (e) {
+      if (popup) {
+        popup.setLngLat(e.lngLat);
+      }
+    });
+
+    map.on("mouseleave", "worksite-fill", () => {
+      map.getCanvas().style.cursor = "";
+      if (popup) {
+        popup.remove();
+      }
+    });
   }, [worksites]);
 
   useEffect(() => {

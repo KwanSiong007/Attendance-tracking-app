@@ -260,7 +260,7 @@ function WorkerScreen({ workerId }) {
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: { xs: "stretch", sm: "center" },
                 justifyContent: "center",
-                gap: 6,
+                gap: { xs: 4, sm: 6 },
               }}
             >
               <Box

@@ -303,6 +303,7 @@ function WorkerScreen({ workerId }) {
                 )}
               </Box>
               <WorkerMap
+                worksites={worksites}
                 location={location}
                 gpsStatus={gpsStatus}
                 gpsSite={gpsSite}

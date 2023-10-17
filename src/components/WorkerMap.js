@@ -9,6 +9,7 @@ import ATTENDANCE_STATUS from "../constants/attendanceStatus";
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
 
 function WorkerMap({
+  worksites,
   location,
   gpsStatus,
   gpsSite,
@@ -35,7 +36,55 @@ function WorkerMap({
       [103.5659, 1.1844],
       [104.0739, 1.4905],
     ]);
-  }, []);
+
+    map.on("load", () => {
+      map.addSource("worksites", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      });
+
+      map.addLayer({
+        id: "worksite-fill",
+        type: "fill",
+        source: "worksites",
+        paint: {
+          "fill-color": "#627BC1",
+          "fill-opacity": 0.5,
+        },
+      });
+
+      map.addLayer({
+        id: "worksite-border",
+        type: "line",
+        source: "worksites",
+        paint: {
+          "line-color": "#627BC1",
+          "line-width": 2,
+        },
+      });
+
+      for (let worksite of worksites) {
+        const feature = {
+          type: "Feature",
+          properties: {
+            name: worksite.name,
+            mapboxId: worksite.mapboxId,
+          },
+          geometry: {
+            type: "Polygon",
+            coordinates: [worksite.coordinates],
+          },
+        };
+
+        const data = map.getSource("worksites")._data;
+        data.features.push(feature);
+        map.getSource("worksites").setData(data);
+      }
+    });
+  }, [worksites]);
 
   useEffect(() => {
     const map = mapRef.current;
